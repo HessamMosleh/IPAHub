@@ -1,0 +1,17 @@
+{
+  "USER_NOT_FOUND": "User not found",
+  "PROVINCE_NOT_FOUND": "Province not found",
+  "MOBILE_EXISTS": "Mobile number already exists",
+  "NATIONAL_CODE_EXISTS": "National code already exists",
+  "USER_EXISTS": "User already exists",
+  "MISSING_SESSION": "Missing session",
+  "INVALID_REFRESH_TOKEN": "Invalid or expired refresh token",
+  "REFRESH_TOKEN_REVOKED": "Refresh token has been revoked",
+  "INVALID_CREDENTIALS": "Invalid credentials",
+  "INVALID_TOKEN_TYPE": "Invalid token type",
+  "TOKEN_REVOKED": "Token has been revoked",
+  "PROVINCE_SLUG_EXISTS": "Province with this slug already exists",
+  "FORBIDDEN_PROVINCE_SCOPE": "You do not have access to this province",
+  "FORBIDDEN_RESOURCE": "Access denied",
+  "CANNOT_REORDER_PROVINCE": "Cannot reorder province in the requested direction"
+}

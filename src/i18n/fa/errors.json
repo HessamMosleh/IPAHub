@@ -1,0 +1,17 @@
+{
+  "USER_NOT_FOUND": "کاربر یافت نشد",
+  "PROVINCE_NOT_FOUND": "استان یافت نشد",
+  "MOBILE_EXISTS": "شماره موبایل قبلاً ثبت شده است",
+  "NATIONAL_CODE_EXISTS": "کد ملی قبلاً ثبت شده است",
+  "USER_EXISTS": "کاربر قبلاً وجود دارد",
+  "MISSING_SESSION": "نشست یافت نشد",
+  "INVALID_REFRESH_TOKEN": "توکن تازه‌سازی نامعتبر یا منقضی شده است",
+  "REFRESH_TOKEN_REVOKED": "توکن تازه‌سازی باطل شده است",
+  "INVALID_CREDENTIALS": "نام کاربری یا رمز عبور اشتباه است",
+  "INVALID_TOKEN_TYPE": "نوع توکن نامعتبر است",
+  "TOKEN_REVOKED": "توکن باطل شده است",
+  "PROVINCE_SLUG_EXISTS": "استانی با این شناسه قبلاً ثبت شده است",
+  "FORBIDDEN_PROVINCE_SCOPE": "شما به این استان دسترسی ندارید",
+  "FORBIDDEN_RESOURCE": "دسترسی غیرمجاز",
+  "CANNOT_REORDER_PROVINCE": "امکان جابجایی استان در جهت درخواستی وجود ندارد"
+}

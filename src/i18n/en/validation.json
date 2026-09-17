@@ -1,0 +1,20 @@
+{
+  "IS_NOT_EMPTY": "{property} should not be empty",
+  "IS_STRING": "{property} must be a string",
+  "IS_EMAIL": "{property} must be an email",
+  "IS_MOBILE_PHONE": "{property} must be a valid mobile phone number",
+  "IS_ENUM": "{property} must be a valid enum value",
+  "IS_DATE": "{property} must be a Date instance",
+  "IS_MONGO_ID": "{property} must be a mongodb id",
+  "IS_JWT": "{property} must be a jwt string",
+  "MIN_LENGTH": "{property} must be longer than or equal to {constraints.0} characters",
+  "MAX_LENGTH": "{property} must be shorter than or equal to {constraints.0} characters",
+  "LENGTH": "{property} must be exactly {constraints.0} characters",
+  "IS_NATIONAL_CODE": "{property} must be a valid Iranian national code",
+  "IS_INT": "{property} must be an integer number",
+  "IS_POSITIVE": "{property} must be a positive number",
+  "MAX": "{property} must not be greater than {constraints.0}",
+  "IS_DATE_STRING": "{property} must be a valid ISO 8601 date string",
+  "IS_URL": "{property} must be an URL address",
+  "MATCHES": "{property} must match {constraints.0} regular expression"
+}
