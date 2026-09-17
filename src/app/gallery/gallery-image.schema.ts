@@ -5,13 +5,16 @@ import {
   LocalizedText,
   LocalizedTextSchema,
 } from '../../common/schemas/localized-text.schema';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 
 /** One slide in the home-page gallery. */
 @Schema({ timestamps: true })
 export class GalleryImage extends Document {
-  /** MinIO object key. */
-  @Prop({ type: String })
-  imageKey: string;
+  @Prop({ type: MediaFileSchema })
+  image: MediaFile;
 
   /** Optional: a photograph may speak for itself. */
   @Prop({ type: LocalizedTextSchema })
@@ -28,7 +31,7 @@ export class GalleryImage extends Document {
 }
 
 export class GalleryImageProp {
-  static general = ['imageKey', 'caption', 'order', 'createdAt'];
+  static general = ['image', 'caption', 'order', 'createdAt'];
 
   static admin = [...this.general, 'status'];
 }

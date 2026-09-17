@@ -21,7 +21,6 @@ import { PersonModule } from './app/person/person.module';
 import { BoardModule } from './app/board/board.module';
 import { ContactModule } from './app/contact/contact.module';
 import { SettingModule } from './app/setting/setting.module';
-import { UploadModule } from './app/upload/upload.module';
 import { RequestTypeModule } from './app/request-type/request-type.module';
 import { DocumentRequestModule } from './app/document-request/document-request.module';
 import { MembershipModule } from './app/membership/membership.module';
@@ -99,9 +98,8 @@ import { PaymentModule } from './app/payment/payment.module';
     EventModule,
     CooperationModule,
     FeedbackModule,
-    // Money and files
+    // Money and ops
     PaymentModule,
-    UploadModule,
     SettingModule,
   ],
 })

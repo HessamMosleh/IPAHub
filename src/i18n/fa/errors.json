@@ -13,5 +13,11 @@
   "PROVINCE_SLUG_EXISTS": "استانی با این شناسه قبلاً ثبت شده است",
   "FORBIDDEN_PROVINCE_SCOPE": "شما به این استان دسترسی ندارید",
   "FORBIDDEN_RESOURCE": "دسترسی غیرمجاز",
-  "CANNOT_REORDER_PROVINCE": "امکان جابجایی استان در جهت درخواستی وجود ندارد"
+  "CANNOT_REORDER_PROVINCE": "امکان جابجایی استان در جهت درخواستی وجود ندارد",
+  "PERSON_NOT_FOUND": "شخص یافت نشد",
+  "LICENSE_NOT_FOUND": "مجوز یا مدرک یافت نشد",
+  "INVALID_SUB_ROLE": "زیرنقش برای این نقش نامعتبر است",
+  "PROVINCE_REQUIRED_FOR_OFFICIAL": "تعیین استان برای مسئولین استانی الزامی است",
+  "CANNOT_REORDER_PERSON": "امکان جابجایی شخص در جهت درخواستی وجود ندارد",
+  "INVALID_VIDEO_URL": "آدرس ویدیو نامعتبر است. تنها پیوندهای آپارات و یوتیوب پشتیبانی می‌شوند"
 }

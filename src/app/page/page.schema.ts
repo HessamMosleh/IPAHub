@@ -4,6 +4,10 @@ import {
   LocalizedText,
   LocalizedTextSchema,
 } from '../../common/schemas/localized-text.schema';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 
 /**
  * The static pages an admin may edit. A closed set, because each one is linked
@@ -35,16 +39,16 @@ export class Page extends Document {
   @Prop({ type: LocalizedTextSchema })
   body: LocalizedText;
 
-  /** MinIO object key for the page's header image. */
-  @Prop({ type: String })
-  imageKey: string;
+  /** Header image. */
+  @Prop({ type: MediaFileSchema })
+  image?: MediaFile;
 
   @Prop({ type: Date })
   createdAt: Date;
 }
 
 export class PageProp {
-  static general = ['key', 'title', 'body', 'imageKey', 'updatedAt'];
+  static general = ['key', 'title', 'body', 'image', 'updatedAt'];
 
   static admin = [...this.general, 'createdAt'];
 }

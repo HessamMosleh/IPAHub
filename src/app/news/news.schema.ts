@@ -5,6 +5,10 @@ import {
   LocalizedText,
   LocalizedTextSchema,
 } from '../../common/schemas/localized-text.schema';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 import { User } from '../user/user.schema';
 
 /**
@@ -43,9 +47,9 @@ export class News extends Document {
   @Prop({ type: LocalizedTextSchema })
   summery: LocalizedText;
 
-  /** MinIO object key for the cover image. */
-  @Prop({ type: String })
-  imageKey: string;
+  /** Cover image. */
+  @Prop({ type: MediaFileSchema })
+  image?: MediaFile;
 
   @Prop({ type: String, enum: NewsCategory, default: NewsCategory.NATIONAL })
   category: NewsCategory;
@@ -86,7 +90,7 @@ export class NewsProp {
     'subTitle',
     'content',
     'summery',
-    'imageKey',
+    'image',
     'category',
     'author',
     'byline',

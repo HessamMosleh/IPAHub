@@ -2,6 +2,10 @@ import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Province } from '../../common/schemas/province.schema';
 import { MembershipType } from '../../common/enums/membership-type.enum';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 
 /**
  * What a user is allowed to do. An array on the document, so one person can be
@@ -56,35 +60,6 @@ export enum MaritalStatus {
   SINGLE = 'single',
   MARRIED = 'married',
 }
-
-/**
- * The user's personal photo, as printed on the membership card.
- *
- * The bytes live in MinIO under `key`; only this metadata is in Mongo. The
- * dimensions are kept because the card renderer lays the photo out without
- * fetching it, and because the photo checks (background, sharpness, subject
- * framing) are expressed in pixels.
- */
-@Schema({ _id: false })
-export class UserPhoto {
-  /** MinIO object key — also the `key` of the matching `Upload` row. */
-  @Prop({ type: String })
-  key: string;
-
-  @Prop({ type: String })
-  mimeType: string;
-
-  @Prop({ type: Number })
-  width: number;
-
-  @Prop({ type: Number })
-  height: number;
-
-  @Prop({ type: Date })
-  uploadedAt: Date;
-}
-
-const UserPhotoSchema = SchemaFactory.createForClass(UserPhoto);
 
 @Schema({ timestamps: true })
 export class User extends Document {
@@ -203,8 +178,13 @@ export class User extends Document {
   @Prop({ type: String })
   rejectionReason: string;
 
-  @Prop({ type: UserPhotoSchema })
-  photo?: UserPhoto;
+  /**
+   * Personal photo as printed on the membership card. Dimensions on the
+   * embedded `MediaFile` let the card renderer lay it out without fetching
+   * the object, and let photo checks express themselves in pixels.
+   */
+  @Prop({ type: MediaFileSchema })
+  photo?: MediaFile;
 
   @Prop({ type: Date })
   mobileVerifiedAt: Date;
@@ -258,4 +238,4 @@ const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index({ status: 1, createdAt: -1 });
 UserSchema.index({ province: 1 });
 
-export { UserSchema, UserPhotoSchema };
+export { UserSchema };

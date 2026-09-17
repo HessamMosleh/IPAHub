@@ -6,6 +6,10 @@ import {
   LocalizedText,
   LocalizedTextSchema,
 } from '../../common/schemas/localized-text.schema';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 
 /**
  * Workshops and conferences are the same entity with separate listings: they are
@@ -43,9 +47,9 @@ export class Event extends Document {
   @Prop({ type: Number, default: 0 })
   fee: number;
 
-  /** MinIO object key for the poster. */
-  @Prop({ type: String })
-  posterKey: string;
+  /** Event poster. */
+  @Prop({ type: MediaFileSchema })
+  poster?: MediaFile;
 
   /** Absent for a national event; set when the event belongs to one branch. */
   @Prop({ type: Types.ObjectId, ref: Province.name })
@@ -68,7 +72,7 @@ export class EventProp {
     'location',
     'capacity',
     'fee',
-    'posterKey',
+    'poster',
     'province',
     'createdAt',
   ];

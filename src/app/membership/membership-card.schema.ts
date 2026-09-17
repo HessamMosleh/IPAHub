@@ -1,6 +1,10 @@
 import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { MembershipType } from '../../common/enums/membership-type.enum';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 import { DocumentRequest } from '../document-request/document-request.schema';
 import { User } from '../user/user.schema';
 
@@ -11,9 +15,8 @@ import { User } from '../user/user.schema';
  * be re-rendered identically later even after the member edits their profile —
  * a card is a document that was issued, not a live view of the holder.
  *
- * Both sides are rendered to PNG and stored in MinIO; this document holds only
- * the object keys. Card text is Persian-only and never depends on the request
- * locale.
+ * Both sides are rendered to PNG and stored in MinIO as embedded `MediaFile`
+ * metadata. Card text is Persian-only and never depends on the request locale.
  */
 @Schema({ timestamps: true })
 export class MembershipCard extends Document {
@@ -24,13 +27,11 @@ export class MembershipCard extends Document {
   @Prop({ type: Types.ObjectId, ref: User.name })
   user: User;
 
-  /** MinIO object key. */
-  @Prop({ type: String })
-  frontImageKey: string;
+  @Prop({ type: MediaFileSchema })
+  frontImage: MediaFile;
 
-  /** MinIO object key. */
-  @Prop({ type: String })
-  backImageKey: string;
+  @Prop({ type: MediaFileSchema })
+  backImage: MediaFile;
 
   // --- Snapshot of what was printed -----------------------------------------
 
@@ -66,8 +67,8 @@ export class MembershipCard extends Document {
 export class MembershipCardProp {
   static general = [
     'request',
-    'frontImageKey',
-    'backImageKey',
+    'frontImage',
+    'backImage',
     'membershipType',
     'fullName',
     'latinName',

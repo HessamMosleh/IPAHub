@@ -1,6 +1,10 @@
 import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { PaymentStatus } from '../../common/enums/payment-status.enum';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 import { RequestType } from '../request-type/request-type.schema';
 import { User } from '../user/user.schema';
 
@@ -53,9 +57,9 @@ export class DocumentRequest extends Document {
   @Prop({ type: String, enum: PaymentStatus, default: PaymentStatus.NONE })
   paymentStatus: PaymentStatus;
 
-  /** MinIO object key of the private file issued TO the member. */
-  @Prop({ type: String })
-  issuedFileKey: string;
+  /** Private file issued TO the member. */
+  @Prop({ type: MediaFileSchema })
+  issuedFile?: MediaFile;
 
   @Prop({ type: String })
   rejectionReason: string;
@@ -71,7 +75,7 @@ export class DocumentRequestProp {
     'note',
     'fee',
     'paymentStatus',
-    'issuedFileKey',
+    'issuedFile',
     'rejectionReason',
     'createdAt',
   ];

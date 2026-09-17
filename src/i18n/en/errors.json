@@ -13,5 +13,11 @@
   "PROVINCE_SLUG_EXISTS": "Province with this slug already exists",
   "FORBIDDEN_PROVINCE_SCOPE": "You do not have access to this province",
   "FORBIDDEN_RESOURCE": "Access denied",
-  "CANNOT_REORDER_PROVINCE": "Cannot reorder province in the requested direction"
+  "CANNOT_REORDER_PROVINCE": "Cannot reorder province in the requested direction",
+  "PERSON_NOT_FOUND": "Person not found",
+  "LICENSE_NOT_FOUND": "License not found",
+  "INVALID_SUB_ROLE": "Invalid subrole for this role",
+  "PROVINCE_REQUIRED_FOR_OFFICIAL": "Province is required for provincial officials",
+  "CANNOT_REORDER_PERSON": "Cannot reorder person in the requested direction",
+  "INVALID_VIDEO_URL": "Invalid video URL. Only YouTube and Aparat links are supported"
 }

@@ -6,6 +6,10 @@ import {
   LocalizedText,
   LocalizedTextSchema,
 } from '../../common/schemas/localized-text.schema';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 
 /**
  * Which part of the organisation a person is listed under. One role per person:
@@ -99,9 +103,9 @@ export class PersonLicense {
   @Prop({ type: LocalizedTextSchema })
   title: LocalizedText;
 
-  /** MinIO object key for the scanned licence. */
-  @Prop({ type: String })
-  imageKey: string;
+  /** Scanned licence image. */
+  @Prop({ type: MediaFileSchema })
+  image: MediaFile;
 
   @Prop({ type: Date })
   createdAt: Date;
@@ -121,9 +125,9 @@ export class Person extends Document {
   @Prop({ type: LocalizedTextSchema })
   name: LocalizedText;
 
-  /** MinIO object key for the portrait. */
-  @Prop({ type: String })
-  photoKey: string;
+  /** Portrait photo. */
+  @Prop({ type: MediaFileSchema })
+  photo?: MediaFile;
 
   @Prop({ type: String, enum: PersonRole })
   role: PersonRole;
@@ -134,7 +138,7 @@ export class Person extends Document {
    * which one applies is decided by the role, and validated on write.
    */
   @Prop({ type: String })
-  subRole: string;
+  subRole?: string;
 
   /** Free-text office name. Stored only for `ROLES_WITH_POSITION_TITLE`. */
   @Prop({ type: LocalizedTextSchema })
@@ -147,23 +151,23 @@ export class Person extends Document {
   @Prop({ type: LocalizedTextSchema })
   resume?: LocalizedText;
 
-  /** MinIO object key for an uploaded CV. */
-  @Prop({ type: String })
-  resumeFileKey: string;
+  /** Uploaded CV file. */
+  @Prop({ type: MediaFileSchema })
+  resumeFile?: MediaFile;
 
   /**
    * A YouTube or Aparat URL, not an embed. Rendered behind a click-to-play
    * facade so nothing loads from the platform until a reader asks for it.
    */
   @Prop({ type: String })
-  introVideoUrl: string;
+  introVideoUrl?: string;
 
   @Prop({ type: LocalizedTextSchema })
   contact?: LocalizedText;
 
   /** Set only when `role` is `PROVINCE_OFFICIAL`. */
   @Prop({ type: Types.ObjectId, ref: Province.name })
-  province: Province;
+  province?: Province;
 
   @Prop({ type: [PersonLicenseSchema], default: [] })
   licenses: PersonLicense[];
@@ -181,13 +185,13 @@ export class Person extends Document {
 export class PersonProp {
   static general = [
     'name',
-    'photoKey',
+    'photo',
     'role',
     'subRole',
     'positionTitle',
     'about',
     'resume',
-    'resumeFileKey',
+    'resumeFile',
     'introVideoUrl',
     'contact',
     'province',

@@ -1,6 +1,10 @@
 import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { PaymentStatus } from '../../common/enums/payment-status.enum';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 import { Event } from './event.schema';
 import { User } from '../user/user.schema';
 
@@ -26,9 +30,9 @@ export class EventRegistration extends Document {
   @Prop({ type: Boolean, default: false })
   attended: boolean;
 
-  /** MinIO object key of the private attendance certificate. */
-  @Prop({ type: String })
-  certificateKey: string;
+  /** Private attendance certificate. */
+  @Prop({ type: MediaFileSchema })
+  certificate?: MediaFile;
 
   @Prop({ type: Date })
   createdAt: Date;
@@ -39,7 +43,7 @@ export class EventRegistrationProp {
     'event',
     'paymentStatus',
     'attended',
-    'certificateKey',
+    'certificate',
     'createdAt',
   ];
 

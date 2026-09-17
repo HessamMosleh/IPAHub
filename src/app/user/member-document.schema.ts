@@ -1,6 +1,10 @@
 import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { User } from './user.schema';
+import {
+  MediaFile,
+  MediaFileSchema,
+} from '../../common/schemas/media-file.schema';
 
 /**
  * All four kinds exist from the start even though membership applications only
@@ -15,12 +19,11 @@ export enum MemberDocumentKind {
 }
 
 /**
- * A file supplied BY a member, as opposed to `DocumentRequest.issuedFileKey`,
+ * A file supplied BY a member, as opposed to `DocumentRequest.issuedFile`,
  * which is issued TO them by an admin.
  *
- * The bytes live in MinIO under a private object key; this row is the metadata
- * and, crucially, the ownership record that every serve route checks before
- * streaming anything.
+ * The bytes live in MinIO under a private object key; this row is the ownership
+ * record that every serve route checks before streaming anything.
  */
 @Schema({ timestamps: true })
 export class MemberDocument extends Document {
@@ -31,36 +34,25 @@ export class MemberDocument extends Document {
   kind: MemberDocumentKind;
 
   /**
-   * MinIO object key — also the `key` of the matching `Upload` row. Unique so
-   * one key can never be claimed by two rows: deleting one would otherwise drop
-   * bytes the other still points at.
+   * Unique on `file.key` so one MinIO object can never be claimed by two rows —
+   * deleting one would otherwise drop bytes the other still points at.
    */
-  @Prop({ type: String, unique: true })
-  storageKey: string;
-
-  /** The name the member's file had, used as the download filename. */
-  @Prop({ type: String })
-  filename: string;
-
-  @Prop({ type: String })
-  mimeType: string;
-
-  /** Bytes. */
-  @Prop({ type: Number })
-  size: number;
+  @Prop({ type: MediaFileSchema })
+  file: MediaFile;
 
   @Prop({ type: Date })
   createdAt: Date;
 }
 
 export class MemberDocumentProp {
-  static general = ['kind', 'filename', 'mimeType', 'size', 'createdAt'];
+  static general = ['kind', 'file', 'createdAt'];
 
-  static admin = [...this.general, 'user', 'storageKey'];
+  static admin = [...this.general, 'user'];
 }
 
 const MemberDocumentSchema = SchemaFactory.createForClass(MemberDocument);
 
 MemberDocumentSchema.index({ user: 1, kind: 1 });
+MemberDocumentSchema.index({ 'file.key': 1 }, { unique: true, sparse: true });
 
 export { MemberDocumentSchema };
