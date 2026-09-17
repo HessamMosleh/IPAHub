@@ -19,5 +19,15 @@
   "INVALID_SUB_ROLE": "Invalid subrole for this role",
   "PROVINCE_REQUIRED_FOR_OFFICIAL": "Province is required for provincial officials",
   "CANNOT_REORDER_PERSON": "Cannot reorder person in the requested direction",
-  "INVALID_VIDEO_URL": "Invalid video URL. Only YouTube and Aparat links are supported"
+  "INVALID_VIDEO_URL": "Invalid video URL. Only YouTube and Aparat links are supported",
+  "BOARD_TERM_NOT_FOUND": "Board term not found",
+  "BOARD_TERM_ORDER_EXISTS": "Board term with this order already exists",
+  "BOARD_TERM_DATES_OVERLAP": "Board term dates overlap with another term",
+  "BOARD_TERM_CHRONOLOGY_CONFLICT": "Board term dates conflict with term numbering chronology",
+  "INVALID_BOARD_TERM_DATES": "End date must be after start date",
+  "BOARD_MEMBER_NOT_FOUND": "Board member not found",
+  "BOARD_MEMBER_ALREADY_EXISTS": "Person is already a member of this board term",
+  "BOARD_POSITION_TAKEN": "This singleton position is already held by another member in this term",
+  "PERSON_MUST_HAVE_BOARD_ROLE": "Selected person must have the BOARD role",
+  "CANNOT_REORDER_BOARD_MEMBER": "Cannot reorder board member in the requested direction"
 }

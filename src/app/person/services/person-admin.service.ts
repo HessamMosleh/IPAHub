@@ -468,7 +468,7 @@ export class PersonAdminService implements IPersonAdminService {
       },
       image: toMediaFile(dto.image),
       createdAt: new Date(),
-    } as PersonLicense);
+    });
 
     return person.save();
   }
