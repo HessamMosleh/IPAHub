@@ -37,7 +37,7 @@ export class News extends Document {
   title: LocalizedText;
 
   @Prop({ type: LocalizedTextSchema })
-  subTitle: LocalizedText;
+  subTitle?: LocalizedText;
 
   /** The article body: sanitized rich text, sanitized on write, not on render. */
   @Prop({ type: LocalizedTextSchema })
@@ -45,7 +45,7 @@ export class News extends Document {
 
   /** Teaser shown in listings and on the home page. */
   @Prop({ type: LocalizedTextSchema })
-  summery: LocalizedText;
+  summery?: LocalizedText;
 
   /** Cover image. */
   @Prop({ type: MediaFileSchema })

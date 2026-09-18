@@ -1,10 +1,10 @@
 import { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { MembershipType } from '../../common/enums/membership-type.enum';
+import { MembershipType } from '../../../common/enums/membership-type.enum';
 import {
   LocalizedText,
   LocalizedTextSchema,
-} from '../../common/schemas/localized-text.schema';
+} from '../../../common/schemas/localized-text.schema';
 
 /**
  * Admin-editable, member-facing copy for one tier: what it is and what it

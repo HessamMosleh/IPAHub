@@ -1,12 +1,12 @@
 import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { MembershipType } from '../../common/enums/membership-type.enum';
+import { MembershipType } from '../../../common/enums/membership-type.enum';
 import {
   MediaFile,
   MediaFileSchema,
-} from '../../common/schemas/media-file.schema';
-import { DocumentRequest } from '../document-request/document-request.schema';
-import { User } from '../user/user.schema';
+} from '../../../common/schemas/media-file.schema';
+import { DocumentRequest } from '../../document-request/document-request.schema';
+import { User } from '../../user/user.schema';
 
 /**
  * A generated membership card.

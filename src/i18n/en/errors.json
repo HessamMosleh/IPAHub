@@ -39,5 +39,22 @@
   "COOPERATION_REQUEST_ALREADY_DECIDED": "This cooperation request has already been decided",
   "REJECTION_REASON_REQUIRED": "Rejection reason is required",
   "MEMBERSHIP_NOT_ACTIVE": "Membership is not active",
-  "AT_LEAST_ONE_COOPERATION_FIELD_REQUIRED": "At least one area of cooperation is required"
+  "AT_LEAST_ONE_COOPERATION_FIELD_REQUIRED": "At least one area of cooperation is required",
+  "MEMBERSHIP_REQUEST_NOT_FOUND": "Membership request not found",
+  "MEMBERSHIP_TYPE_NOT_APPLICABLE": "This membership tier cannot be applied for",
+  "MEMBERSHIP_ALREADY_SAME_TYPE": "You already hold this membership tier",
+  "MEMBERSHIP_REQUEST_ALREADY_OPEN": "You already have a membership request in progress",
+  "MEMBERSHIP_REQUEST_ALREADY_DECIDED": "This membership request has already been decided",
+  "MEMBERSHIP_REQUEST_NOT_AWAITING_PAYMENT": "This membership request is not awaiting payment",
+  "MEMBERSHIP_PROFILE_INCOMPLETE": "Complete your profile before applying for membership",
+  "MEMBERSHIP_REQUIRED_DOCUMENT_MISSING": "A required document for this membership tier is missing",
+  "MEMBERSHIP_FORM_INVALID": "The membership application form is missing required fields",
+  "MEMBERSHIP_FORM_INVALID_FORMAT": "One or more membership application fields have an invalid format",
+  "MEMBERSHIP_NO_TYPE_TO_RENEW": "You do not have a membership tier to renew",
+  "MEMBERSHIP_FEE_NOT_FOUND": "Membership fee configuration not found",
+  "MEMBERSHIP_TYPE_INFO_NOT_FOUND": "Membership tier information not found",
+  "INVALID_MONEY_AMOUNT": "Invalid monetary amount",
+  "NEWS_NOT_FOUND": "News post not found",
+  "PROVINCE_REQUIRED_FOR_PROVINCIAL_NEWS": "Province is required for provincial news",
+  "CANNOT_CREATE_NATIONAL_NEWS": "Province administrators cannot create national news"
 }

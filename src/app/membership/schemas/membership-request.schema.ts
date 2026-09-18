@@ -1,8 +1,8 @@
 import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { MembershipType } from '../../common/enums/membership-type.enum';
-import { PaymentStatus } from '../../common/enums/payment-status.enum';
-import { User } from '../user/user.schema';
+import { MembershipType } from '../../../common/enums/membership-type.enum';
+import { PaymentStatus } from '../../../common/enums/payment-status.enum';
+import { User } from '../../user/user.schema';
 
 /**
  * Applications are vetted by an admin; renewals are self-serve and are born

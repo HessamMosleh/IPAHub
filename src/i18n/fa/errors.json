@@ -39,5 +39,22 @@
   "COOPERATION_REQUEST_ALREADY_DECIDED": "این درخواست همکاری قبلاً تعیین وضعیت شده است",
   "REJECTION_REASON_REQUIRED": "دلیل رد درخواست الزامی است",
   "MEMBERSHIP_NOT_ACTIVE": "عضویت شما فعال نیست",
-  "AT_LEAST_ONE_COOPERATION_FIELD_REQUIRED": "انتخاب حداقل یک زمینه همکاری الزامی است"
+  "AT_LEAST_ONE_COOPERATION_FIELD_REQUIRED": "انتخاب حداقل یک زمینه همکاری الزامی است",
+  "MEMBERSHIP_REQUEST_NOT_FOUND": "درخواست عضویت یافت نشد",
+  "MEMBERSHIP_TYPE_NOT_APPLICABLE": "امکان درخواست این نوع عضویت وجود ندارد",
+  "MEMBERSHIP_ALREADY_SAME_TYPE": "شما هم‌اکنون این نوع عضویت را دارید",
+  "MEMBERSHIP_REQUEST_ALREADY_OPEN": "شما یک درخواست عضویت در حال بررسی دارید",
+  "MEMBERSHIP_REQUEST_ALREADY_DECIDED": "این درخواست عضویت قبلاً تعیین وضعیت شده است",
+  "MEMBERSHIP_REQUEST_NOT_AWAITING_PAYMENT": "این درخواست عضویت در انتظار پرداخت نیست",
+  "MEMBERSHIP_PROFILE_INCOMPLETE": "پیش از درخواست عضویت، اطلاعات پروفایل خود را کامل کنید",
+  "MEMBERSHIP_REQUIRED_DOCUMENT_MISSING": "مدرک لازم برای این نوع عضویت بارگذاری نشده است",
+  "MEMBERSHIP_FORM_INVALID": "فرم درخواست عضویت دارای فیلدهای الزامی تکمیل‌نشده است",
+  "MEMBERSHIP_FORM_INVALID_FORMAT": "قالب یک یا چند فیلد فرم عضویت نامعتبر است",
+  "MEMBERSHIP_NO_TYPE_TO_RENEW": "شما عضویتی برای تمدید ندارید",
+  "MEMBERSHIP_FEE_NOT_FOUND": "پیکربندی هزینه عضویت یافت نشد",
+  "MEMBERSHIP_TYPE_INFO_NOT_FOUND": "اطلاعات نوع عضویت یافت نشد",
+  "INVALID_MONEY_AMOUNT": "مبلغ واردشده نامعتبر است",
+  "NEWS_NOT_FOUND": "خبر مورد نظر یافت نشد",
+  "PROVINCE_REQUIRED_FOR_PROVINCIAL_NEWS": "انتخاب استان برای اخبار استانی الزامی است",
+  "CANNOT_CREATE_NATIONAL_NEWS": "مدیران استانی مجاز به ایجاد اخبار سراسری نیستند"
 }

@@ -1,5 +1,5 @@
-import { MembershipType } from '../../common/enums/membership-type.enum';
-import { MemberDocumentKind } from '../user/member-document.schema';
+import { MembershipType } from '../../../common/enums/membership-type.enum';
+import { MemberDocumentKind } from '../../user/member-document.schema';
 
 /**
  * How the apply form renders a field, and how the write path validates it.

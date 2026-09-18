@@ -1,7 +1,7 @@
 import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { MembershipType } from '../../common/enums/membership-type.enum';
-import { Province } from '../../common/schemas/province.schema';
+import { MembershipType } from '../../../common/enums/membership-type.enum';
+import { Province } from '../../../common/schemas/province.schema';
 
 /**
  * A province's override of one tier's fees.

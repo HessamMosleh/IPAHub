@@ -19,5 +19,8 @@
   "MATCHES": "{property} must match {constraints.0} regular expression",
   "IS_ARRAY": "{property} must be an array",
   "ARRAY_NOT_EMPTY": "{property} should not be empty",
-  "ARRAY_UNIQUE": "All {property}'s elements must be unique"
+  "ARRAY_UNIQUE": "All {property}'s elements must be unique",
+  "IS_OBJECT": "{property} must be an object",
+  "IS_NUMBER": "{property} must be a number",
+  "MIN": "{property} must not be less than {constraints.0}"
 }

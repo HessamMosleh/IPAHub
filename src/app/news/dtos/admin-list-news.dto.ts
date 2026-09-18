@@ -11,9 +11,9 @@ import {
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { i18nValidationMessage } from 'nestjs-i18n';
-import { NewsCategory } from '../news.schema';
+import { NewsCategory, NewsStatus } from '../news.schema';
 
-export class ListNewsDto {
+export class AdminListNewsDto {
   @ApiPropertyOptional({ type: Number, example: 1, default: 1 })
   @IsOptional()
   @Type(() => Number)
@@ -31,8 +31,17 @@ export class ListNewsDto {
   limit?: number = 20;
 
   @ApiPropertyOptional({
+    enum: NewsStatus,
+    description: 'Filter by publication status',
+    example: NewsStatus.ACTIVE,
+  })
+  @IsOptional()
+  @IsEnum(NewsStatus, { message: i18nValidationMessage('validation.IS_ENUM') })
+  status?: NewsStatus;
+
+  @ApiPropertyOptional({
     enum: NewsCategory,
-    description: 'Filter by national or provincial scope',
+    description: 'Filter by category (national or provincial)',
     example: NewsCategory.NATIONAL,
   })
   @IsOptional()
@@ -52,8 +61,9 @@ export class ListNewsDto {
 
   @ApiPropertyOptional({
     type: String,
-    description: 'Search term matched against title, subtitle, and summary',
-    example: 'conference',
+    description:
+      'Search term matched against title, subtitle, summary, and byline',
+    example: 'general assembly',
   })
   @IsOptional()
   @IsString({ message: i18nValidationMessage('validation.IS_STRING') })
