@@ -23,10 +23,13 @@ export class ContactMessage extends Document {
 
   @Prop({ type: Date })
   createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt?: Date;
 }
 
 export class ContactMessageProp {
-  static general = ['name', 'email', 'message', 'createdAt'];
+  static general = ['name', 'email', 'message', 'createdAt', 'updatedAt'];
 
   static admin = [...this.general, 'read'];
 }

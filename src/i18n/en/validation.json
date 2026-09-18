@@ -16,5 +16,8 @@
   "MAX": "{property} must not be greater than {constraints.0}",
   "IS_DATE_STRING": "{property} must be a valid ISO 8601 date string",
   "IS_URL": "{property} must be an URL address",
-  "MATCHES": "{property} must match {constraints.0} regular expression"
+  "MATCHES": "{property} must match {constraints.0} regular expression",
+  "IS_ARRAY": "{property} must be an array",
+  "ARRAY_NOT_EMPTY": "{property} should not be empty",
+  "ARRAY_UNIQUE": "All {property}'s elements must be unique"
 }

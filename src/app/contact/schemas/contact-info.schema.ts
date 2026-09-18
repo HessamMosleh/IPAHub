@@ -3,11 +3,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import {
   LocalizedText,
   LocalizedTextSchema,
-} from '../../common/schemas/localized-text.schema';
+} from '../../../common/schemas/localized-text.schema';
 import {
   SocialLinks,
   SocialLinksSchema,
-} from '../../common/schemas/social-links.schema';
+} from '../../../common/schemas/social-links.schema';
 
 /** The `key` of the one document this collection is expected to hold. */
 export const MAIN_CONTACT_INFO_KEY = 'main';
@@ -39,12 +39,22 @@ export class ContactInfo extends Document {
 
   @Prop({ type: Date })
   createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt?: Date;
 }
 
 export class ContactInfoProp {
-  static general = ['address', 'phone', 'email', 'socials'];
+  static general = [
+    'address',
+    'phone',
+    'email',
+    'socials',
+    'createdAt',
+    'updatedAt',
+  ];
 
-  static admin = [...this.general, 'key', 'createdAt'];
+  static admin = [...this.general, 'key'];
 }
 
 const ContactInfoSchema = SchemaFactory.createForClass(ContactInfo);

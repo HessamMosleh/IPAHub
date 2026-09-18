@@ -29,5 +29,15 @@
   "BOARD_MEMBER_ALREADY_EXISTS": "این شخص قبلاً در این دوره هیئت مدیره عضو شده است",
   "BOARD_POSITION_TAKEN": "این سمت یکتا قبلاً توسط عضو دیگری در این دوره تصاحب شده است",
   "PERSON_MUST_HAVE_BOARD_ROLE": "شخص انتخاب شده باید دارای نقش هیئت مدیره باشد",
-  "CANNOT_REORDER_BOARD_MEMBER": "امکان جابجایی عضو هیئت مدیره در جهت درخواستی وجود ندارد"
+  "CANNOT_REORDER_BOARD_MEMBER": "امکان جابجایی عضو هیئت مدیره در جهت درخواستی وجود ندارد",
+  "COMMUNITY_SERVICE_NOT_FOUND": "خدمت انجمن یافت نشد",
+  "CANNOT_REORDER_COMMUNITY_SERVICE": "امکان جابجایی خدمت انجمن در جهت درخواستی وجود ندارد",
+  "CONTACT_INFO_NOT_FOUND": "اطلاعات تماس یافت نشد",
+  "CONTACT_MESSAGE_NOT_FOUND": "پیام تماس یافت نشد",
+  "COOPERATION_REQUEST_NOT_FOUND": "درخواست همکاری یافت نشد",
+  "COOPERATION_REQUEST_ALREADY_PENDING": "شما یک درخواست همکاری در حال بررسی دارید",
+  "COOPERATION_REQUEST_ALREADY_DECIDED": "این درخواست همکاری قبلاً تعیین وضعیت شده است",
+  "REJECTION_REASON_REQUIRED": "دلیل رد درخواست الزامی است",
+  "MEMBERSHIP_NOT_ACTIVE": "عضویت شما فعال نیست",
+  "AT_LEAST_ONE_COOPERATION_FIELD_REQUIRED": "انتخاب حداقل یک زمینه همکاری الزامی است"
 }

@@ -76,10 +76,10 @@ export class CooperationRequest extends Document {
   status: CooperationRequestStatus;
 
   @Prop({ type: String })
-  rejectionReason: string;
+  rejectionReason?: string;
 
   @Prop({ type: Date })
-  decidedAt: Date;
+  decidedAt?: Date;
 
   @Prop({ type: Date })
   createdAt: Date;

@@ -16,5 +16,8 @@
   "MAX": "{property} نباید بزرگتر از {constraints.0} باشد",
   "IS_DATE_STRING": "{property} باید یک تاریخ معتبر ISO 8601 باشد",
   "IS_URL": "{property} باید یک آدرس اینترنتی معتبر باشد",
-  "MATCHES": "{property} با الگوی مجاز مطابقت ندارد"
+  "MATCHES": "{property} با الگوی مجاز مطابقت ندارد",
+  "IS_ARRAY": "{property} باید یک آرایه باشد",
+  "ARRAY_NOT_EMPTY": "{property} نباید خالی باشد",
+  "ARRAY_UNIQUE": "تمام مقادیر {property} باید یکتا باشند"
 }

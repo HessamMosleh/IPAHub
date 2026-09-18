@@ -19,10 +19,13 @@ export class CommunityService extends Document {
 
   @Prop({ type: Date })
   createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt?: Date;
 }
 
 export class CommunityServiceProp {
-  static general = ['title', 'description', 'order', 'createdAt'];
+  static general = ['title', 'description', 'order', 'createdAt', 'updatedAt'];
 
   static admin = [...this.general];
 }

@@ -29,5 +29,15 @@
   "BOARD_MEMBER_ALREADY_EXISTS": "Person is already a member of this board term",
   "BOARD_POSITION_TAKEN": "This singleton position is already held by another member in this term",
   "PERSON_MUST_HAVE_BOARD_ROLE": "Selected person must have the BOARD role",
-  "CANNOT_REORDER_BOARD_MEMBER": "Cannot reorder board member in the requested direction"
+  "CANNOT_REORDER_BOARD_MEMBER": "Cannot reorder board member in the requested direction",
+  "COMMUNITY_SERVICE_NOT_FOUND": "Community service not found",
+  "CANNOT_REORDER_COMMUNITY_SERVICE": "Cannot reorder community service in the requested direction",
+  "CONTACT_INFO_NOT_FOUND": "Contact information not found",
+  "CONTACT_MESSAGE_NOT_FOUND": "Contact message not found",
+  "COOPERATION_REQUEST_NOT_FOUND": "Cooperation request not found",
+  "COOPERATION_REQUEST_ALREADY_PENDING": "You already have a cooperation request under review",
+  "COOPERATION_REQUEST_ALREADY_DECIDED": "This cooperation request has already been decided",
+  "REJECTION_REASON_REQUIRED": "Rejection reason is required",
+  "MEMBERSHIP_NOT_ACTIVE": "Membership is not active",
+  "AT_LEAST_ONE_COOPERATION_FIELD_REQUIRED": "At least one area of cooperation is required"
 }
