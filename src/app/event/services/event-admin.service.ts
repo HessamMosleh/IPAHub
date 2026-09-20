@@ -150,7 +150,7 @@ export class EventAdminService implements IEventAdminService {
       this.eventModel.countDocuments(filter).exec(),
     ]);
 
-    const eventIds = events.map((e) => e._id as Types.ObjectId);
+    const eventIds = events.map((e) => e._id);
 
     const registrationCounts = await this.eventRegistrationModel.aggregate<{
       _id: Types.ObjectId;
@@ -167,8 +167,7 @@ export class EventAdminService implements IEventAdminService {
 
     const data: AdminEventItem[] = events.map((event) => ({
       event,
-      registrationCount:
-        countsMap.get((event._id as Types.ObjectId).toString()) ?? 0,
+      registrationCount: countsMap.get(event._id.toString()) ?? 0,
     }));
 
     return {
@@ -214,7 +213,7 @@ export class EventAdminService implements IEventAdminService {
       (r) => r === UserRole.SUPER_ADMIN || r === UserRole.ADMIN,
     );
 
-    let provinceId: string | undefined = dto.province
+    const provinceId: string | undefined = dto.province
       ? idToString(dto.province)
       : undefined;
 
@@ -282,9 +281,9 @@ export class EventAdminService implements IEventAdminService {
         }
         this.assertProvinceScope(newProvinceId, admin);
       }
-      event.province = (
-        newProvinceId ? new Types.ObjectId(newProvinceId) : undefined
-      ) as unknown as Event['province'];
+      event.province = (newProvinceId
+        ? new Types.ObjectId(newProvinceId)
+        : undefined) as unknown as Event['province'];
     }
 
     if (dto.type) event.type = dto.type;
@@ -412,7 +411,7 @@ export class EventAdminService implements IEventAdminService {
         .select('_id')
         .exec();
 
-      const userIds = matchingUsers.map((u) => u._id as Types.ObjectId);
+      const userIds = matchingUsers.map((u) => u._id);
       filter.user = { $in: userIds };
     }
 

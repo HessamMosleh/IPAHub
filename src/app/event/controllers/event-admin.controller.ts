@@ -74,8 +74,9 @@ export class EventAdminController {
     const result = await this.eventAdminService.findAll(query, user);
 
     const data: EventResponseDto[] = result.data.map((item) => ({
-      ...((item.event as unknown as { toObject?: () => Record<string, unknown> })
-        .toObject
+      ...((
+        item.event as unknown as { toObject?: () => Record<string, unknown> }
+      ).toObject
         ? (
             item.event as unknown as {
               toObject: () => Record<string, unknown>;
@@ -112,8 +113,9 @@ export class EventAdminController {
     const item = await this.eventAdminService.findById(id, user);
 
     return {
-      ...((item.event as unknown as { toObject?: () => Record<string, unknown> })
-        .toObject
+      ...((
+        item.event as unknown as { toObject?: () => Record<string, unknown> }
+      ).toObject
         ? (
             item.event as unknown as {
               toObject: () => Record<string, unknown>;

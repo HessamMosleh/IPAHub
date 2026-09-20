@@ -171,8 +171,8 @@ describe('EventController', () => {
   });
 
   it('throws BadRequestException if body register has no eventId', async () => {
-    await expect(
-      controller.registerByBody({}, mockUser),
-    ).rejects.toThrow(BadRequestException);
+    await expect(controller.registerByBody({}, mockUser)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 });

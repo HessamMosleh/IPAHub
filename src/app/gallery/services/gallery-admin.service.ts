@@ -5,10 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, QueryFilter } from 'mongoose';
-import {
-  GalleryImage,
-  GalleryImageProp,
-} from '../gallery-image.schema';
+import { GalleryImage, GalleryImageProp } from '../gallery-image.schema';
+import { LocalizedText } from '../../../common/schemas/localized-text.schema';
 import { ActiveStatus } from '../../../common/enums/active-status.enum';
 import { translate } from '../../../common/utils/translate';
 import { toMediaFile } from '../../../common/utils/media-file.util';
@@ -118,7 +116,7 @@ export class GalleryAdminService implements IGalleryAdminService {
 
     const image = toMediaFile(dto.image);
 
-    let caption = undefined;
+    let caption: LocalizedText | undefined = undefined;
     if (dto.caption) {
       const en = dto.caption.en?.trim();
       const fa = dto.caption.fa?.trim();
@@ -141,10 +139,7 @@ export class GalleryAdminService implements IGalleryAdminService {
   /**
    * Updates gallery slide properties (image, caption, order, status).
    */
-  async update(
-    id: string,
-    dto: UpdateGalleryImageDto,
-  ): Promise<GalleryImage> {
+  async update(id: string, dto: UpdateGalleryImageDto): Promise<GalleryImage> {
     if (!isValidObjectId(id)) {
       throw new NotFoundException(translate('errors.GALLERY_IMAGE_NOT_FOUND'));
     }

@@ -44,9 +44,7 @@ import {
 @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
 @Controller('admin/gallery')
 export class GalleryAdminController {
-  constructor(
-    private readonly galleryAdminService: GalleryAdminService,
-  ) {}
+  constructor(private readonly galleryAdminService: GalleryAdminService) {}
 
   @Get()
   @ApiOperation({
@@ -90,9 +88,7 @@ export class GalleryAdminController {
     description: 'Gallery image details.',
   })
   @ApiNotFoundResponse({ description: 'Gallery image not found.' })
-  async findById(
-    @Param('id') id: string,
-  ): Promise<GalleryImageResponseDto> {
+  async findById(@Param('id') id: string): Promise<GalleryImageResponseDto> {
     const image = await this.galleryAdminService.findById(id);
     return image as unknown as GalleryImageResponseDto;
   }

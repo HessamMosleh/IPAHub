@@ -5,10 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, QueryFilter, Types } from 'mongoose';
-import {
-  MemberFeedback,
-  MemberFeedbackProp,
-} from '../member-feedback.schema';
+import { MemberFeedback, MemberFeedbackProp } from '../member-feedback.schema';
 import { User, UserStatus } from '../../user/user.schema';
 import { translate } from '../../../common/utils/translate';
 import { CreateFeedbackDto } from '../dtos/create-feedback.dto';

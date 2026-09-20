@@ -90,7 +90,8 @@ export class ClientEventResponseDto extends EventResponseDto {
   @ApiPropertyOptional({
     type: Boolean,
     example: true,
-    description: 'Whether authenticated user is already registered for this event',
+    description:
+      'Whether authenticated user is already registered for this event',
   })
   isRegistered?: boolean;
 

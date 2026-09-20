@@ -105,7 +105,7 @@ export class EventService implements IEventService {
       this.eventModel.countDocuments(filter).exec(),
     ]);
 
-    const eventIds = events.map((e) => e._id as Types.ObjectId);
+    const eventIds = events.map((e) => e._id);
 
     // Compute taken registrations count for all events in this page
     const registrationCounts = await this.eventRegistrationModel.aggregate<{
@@ -122,7 +122,7 @@ export class EventService implements IEventService {
     }
 
     // If member is authenticated, find which events they have registered for
-    let userRegistrationsMap = new Map<string, EventRegistration>();
+    const userRegistrationsMap = new Map<string, EventRegistration>();
     if (userId) {
       const userRegistrations = await this.eventRegistrationModel
         .find({
@@ -133,15 +133,15 @@ export class EventService implements IEventService {
         .exec();
 
       for (const reg of userRegistrations) {
-        const eventIdStr = (
-          reg.event?._id ? reg.event._id.toString() : reg.event.toString()
-        ) as string;
+        const eventIdStr = reg.event?._id
+          ? reg.event._id.toString()
+          : reg.event.toString();
         userRegistrationsMap.set(eventIdStr, reg);
       }
     }
 
     const data: ClientEventItem[] = events.map((event) => {
-      const eventIdStr = (event._id as Types.ObjectId).toString();
+      const eventIdStr = event._id.toString();
       const taken = countsMap.get(eventIdStr) ?? 0;
       const isFull = event.capacity != null ? taken >= event.capacity : false;
       const userReg = userRegistrationsMap.get(eventIdStr);
@@ -311,7 +311,7 @@ export class EventService implements IEventService {
         .select('_id')
         .exec();
 
-      const eventIds = matchingEvents.map((e) => e._id as Types.ObjectId);
+      const eventIds = matchingEvents.map((e) => e._id);
       filter.event = { $in: eventIds };
     }
 

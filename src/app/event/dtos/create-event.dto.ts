@@ -70,7 +70,8 @@ export class CreateEventDto {
 
   @ApiPropertyOptional({
     type: Number,
-    description: 'Participant capacity limit. Absent/null means unlimited seats.',
+    description:
+      'Participant capacity limit. Absent/null means unlimited seats.',
     example: 50,
   })
   @IsOptional()
@@ -123,7 +124,8 @@ export class CreateEventDto {
   @ApiPropertyOptional({
     enum: ActiveStatus,
     default: ActiveStatus.DISABLED,
-    description: 'Active status (ACTIVE = published and open, DISABLED = draft/hidden)',
+    description:
+      'Active status (ACTIVE = published and open, DISABLED = draft/hidden)',
     example: ActiveStatus.ACTIVE,
   })
   @IsOptional()

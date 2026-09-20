@@ -66,7 +66,10 @@ describe('EventService', () => {
 
   describe('findAllActive', () => {
     it('returns active upcoming events sorted ascending by startsAt with taken seats', async () => {
-      const eventDoc = buildEventDoc({ _id: FIXED_EVENT_ID as any, capacity: 20 });
+      const eventDoc = buildEventDoc({
+        _id: FIXED_EVENT_ID,
+        capacity: 20,
+      });
       mockEventModel.find.mockReturnValue(buildQueryChain([eventDoc]));
       mockEventModel.countDocuments.mockReturnValue(buildQueryChain(1));
       mockEventRegistrationModel.aggregate.mockResolvedValue([
@@ -125,7 +128,7 @@ describe('EventService', () => {
     });
 
     it('resolves user registration status if userId is provided', async () => {
-      const eventDoc = buildEventDoc({ _id: FIXED_EVENT_ID as any });
+      const eventDoc = buildEventDoc({ _id: FIXED_EVENT_ID });
       const regDoc = buildEventRegistrationDoc({
         event: FIXED_EVENT_ID as any,
         user: FIXED_USER_ID as any,
@@ -191,9 +194,7 @@ describe('EventService', () => {
 
       mockUserModel.findById.mockReturnValue(buildQueryChain(user));
       mockEventModel.findById.mockReturnValue(buildQueryChain(event));
-      mockEventRegistrationModel.findOne.mockReturnValue(
-        buildQueryChain(null),
-      );
+      mockEventRegistrationModel.findOne.mockReturnValue(buildQueryChain(null));
       mockEventRegistrationModel.countDocuments.mockReturnValue(
         buildQueryChain(10),
       );
@@ -222,9 +223,7 @@ describe('EventService', () => {
 
       mockUserModel.findById.mockReturnValue(buildQueryChain(user));
       mockEventModel.findById.mockReturnValue(buildQueryChain(event));
-      mockEventRegistrationModel.findOne.mockReturnValue(
-        buildQueryChain(null),
-      );
+      mockEventRegistrationModel.findOne.mockReturnValue(buildQueryChain(null));
       mockEventRegistrationModel.countDocuments.mockReturnValue(
         buildQueryChain(5),
       );
@@ -303,9 +302,7 @@ describe('EventService', () => {
 
       mockUserModel.findById.mockReturnValue(buildQueryChain(user));
       mockEventModel.findById.mockReturnValue(buildQueryChain(event));
-      mockEventRegistrationModel.findOne.mockReturnValue(
-        buildQueryChain(null),
-      );
+      mockEventRegistrationModel.findOne.mockReturnValue(buildQueryChain(null));
       mockEventRegistrationModel.countDocuments.mockReturnValue(
         buildQueryChain(20),
       );
@@ -321,9 +318,7 @@ describe('EventService', () => {
 
       mockUserModel.findById.mockReturnValue(buildQueryChain(user));
       mockEventModel.findById.mockReturnValue(buildQueryChain(event));
-      mockEventRegistrationModel.findOne.mockReturnValue(
-        buildQueryChain(null),
-      );
+      mockEventRegistrationModel.findOne.mockReturnValue(buildQueryChain(null));
       mockEventRegistrationModel.countDocuments.mockReturnValue(
         buildQueryChain(5),
       );
@@ -339,7 +334,7 @@ describe('EventService', () => {
     it('returns paginated registrations for the current member', async () => {
       const reg1 = buildEventRegistrationDoc();
       const reg2 = buildEventRegistrationDoc({
-        _id: '507f1f77bcf86cd799439099' as any,
+        _id: '507f1f77bcf86cd799439099',
       });
 
       mockEventRegistrationModel.find.mockReturnValue(
@@ -386,9 +381,7 @@ describe('EventService', () => {
   describe('findUserRegistrationById', () => {
     it('returns registration if owned by user', async () => {
       const reg = buildEventRegistrationDoc();
-      mockEventRegistrationModel.findOne.mockReturnValue(
-        buildQueryChain(reg),
-      );
+      mockEventRegistrationModel.findOne.mockReturnValue(buildQueryChain(reg));
 
       const result = await service.findUserRegistrationById(
         FIXED_REGISTRATION_ID,
@@ -399,9 +392,7 @@ describe('EventService', () => {
     });
 
     it('throws NotFoundException if registration not found or belongs to another user', async () => {
-      mockEventRegistrationModel.findOne.mockReturnValue(
-        buildQueryChain(null),
-      );
+      mockEventRegistrationModel.findOne.mockReturnValue(buildQueryChain(null));
 
       await expect(
         service.findUserRegistrationById(FIXED_REGISTRATION_ID, FIXED_USER_ID),

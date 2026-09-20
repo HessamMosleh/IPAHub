@@ -1,10 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, QueryFilter } from 'mongoose';
-import {
-  GalleryImage,
-  GalleryImageProp,
-} from '../gallery-image.schema';
+import { GalleryImage, GalleryImageProp } from '../gallery-image.schema';
 import { ActiveStatus } from '../../../common/enums/active-status.enum';
 import { translate } from '../../../common/utils/translate';
 import { ListGalleryImagesDto } from '../dtos/list-gallery-images.dto';

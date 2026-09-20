@@ -33,7 +33,8 @@ export class ListEventsDto {
 
   @ApiPropertyOptional({
     type: String,
-    description: 'Filter by province MongoDB ObjectId (or omit for all/national)',
+    description:
+      'Filter by province MongoDB ObjectId (or omit for all/national)',
     example: '66fa3b5a9c1e7a001f3e9a11',
   })
   @IsOptional()

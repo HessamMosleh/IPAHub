@@ -2,10 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { FeedbackService } from './feedback.service';
-import {
-  MemberFeedback,
-  MemberFeedbackProp,
-} from '../member-feedback.schema';
+import { MemberFeedback, MemberFeedbackProp } from '../member-feedback.schema';
 import { User, UserStatus } from '../../user/user.schema';
 import {
   buildFeedbackDoc,
@@ -144,9 +141,9 @@ describe('FeedbackService', () => {
     });
 
     it('throws NotFoundException if user id is invalid', async () => {
-      await expect(
-        service.findAllByUser('invalid-id'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.findAllByUser('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

@@ -99,7 +99,7 @@ describe('EventAdminService', () => {
 
   describe('findAll', () => {
     it('returns all events for super admin with registration count', async () => {
-      const eventDoc = buildEventDoc({ _id: FIXED_EVENT_ID as any });
+      const eventDoc = buildEventDoc({ _id: FIXED_EVENT_ID });
       mockEventModel.find.mockReturnValue(buildQueryChain([eventDoc]));
       mockEventModel.countDocuments.mockReturnValue(buildQueryChain(1));
       mockEventRegistrationModel.aggregate.mockResolvedValue([
@@ -165,7 +165,10 @@ describe('EventAdminService', () => {
       mockEventModel.findById.mockReturnValue(buildQueryChain(eventDoc));
 
       await expect(
-        service.findById(FIXED_EVENT_ID, buildProvinceAdmin([FIXED_PROVINCE_ID])),
+        service.findById(
+          FIXED_EVENT_ID,
+          buildProvinceAdmin([FIXED_PROVINCE_ID]),
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 

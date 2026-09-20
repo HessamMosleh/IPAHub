@@ -22,8 +22,7 @@ export class GalleryController {
 
   @Get()
   @ApiOperation({
-    summary:
-      'List all active gallery images ordered for home page carousel',
+    summary: 'List all active gallery images ordered for home page carousel',
   })
   @ApiOkResponse({
     type: [GalleryImageResponseDto],

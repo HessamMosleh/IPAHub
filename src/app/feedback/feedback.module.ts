@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  MemberFeedback,
-  MemberFeedbackSchema,
-} from './member-feedback.schema';
+import { MemberFeedback, MemberFeedbackSchema } from './member-feedback.schema';
 import { User, UserSchema } from '../user/user.schema';
 import { FeedbackService } from './services/feedback.service';
 import { FeedbackAdminService } from './services/feedback-admin.service';

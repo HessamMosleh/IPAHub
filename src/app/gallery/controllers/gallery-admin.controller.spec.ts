@@ -105,10 +105,7 @@ describe('GalleryAdminController', () => {
     const result = await controller.update(FIXED_GALLERY_ID, dto);
 
     expect(mockAdminService.update).toHaveBeenCalledTimes(1);
-    expect(mockAdminService.update).toHaveBeenCalledWith(
-      FIXED_GALLERY_ID,
-      dto,
-    );
+    expect(mockAdminService.update).toHaveBeenCalledWith(FIXED_GALLERY_ID, dto);
     expect(result).toEqual(item);
   });
 
@@ -161,9 +158,9 @@ describe('GalleryAdminController', () => {
     const err = new Error('create failed');
     mockAdminService.create.mockRejectedValue(err);
 
-    await expect(
-      controller.create(buildCreateGalleryImageDto()),
-    ).rejects.toBe(err);
+    await expect(controller.create(buildCreateGalleryImageDto())).rejects.toBe(
+      err,
+    );
   });
 
   it('propagates update errors without swallowing', async () => {
@@ -207,7 +204,7 @@ describe('GalleryAdminController', () => {
       totalPages: 0,
     });
 
-    const result = await controller.findAll({} as any);
+    const result = await controller.findAll({});
 
     expect(mockAdminService.findAll).toHaveBeenCalledTimes(1);
     expect(result.total).toBe(0);

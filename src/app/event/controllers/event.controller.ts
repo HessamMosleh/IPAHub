@@ -63,8 +63,9 @@ export class EventController {
     const result = await this.eventService.findAllActive(query, user?.id);
 
     const data: ClientEventResponseDto[] = result.data.map((item) => ({
-      ...((item.event as unknown as { toObject?: () => Record<string, unknown> })
-        .toObject
+      ...((
+        item.event as unknown as { toObject?: () => Record<string, unknown> }
+      ).toObject
         ? (
             item.event as unknown as {
               toObject: () => Record<string, unknown>;
@@ -76,8 +77,7 @@ export class EventController {
       isFull: item.isFull,
       isRegistered: item.isRegistered,
       userRegistration: item.userRegistration as unknown as
-        | EventRegistrationResponseDto
-        | undefined,
+        EventRegistrationResponseDto | undefined,
     })) as unknown as ClientEventResponseDto[];
 
     return {
@@ -115,7 +115,8 @@ export class EventController {
   @ApiBearerAuth('access-token')
   @UseGuards(AuthGuard('jwt'))
   @ApiOperation({
-    summary: 'Get a specific event registration receipt and certificate for current member',
+    summary:
+      'Get a specific event registration receipt and certificate for current member',
   })
   @ApiParam({
     name: 'id',
@@ -161,8 +162,9 @@ export class EventController {
     const item = await this.eventService.findById(id, user?.id);
 
     return {
-      ...((item.event as unknown as { toObject?: () => Record<string, unknown> })
-        .toObject
+      ...((
+        item.event as unknown as { toObject?: () => Record<string, unknown> }
+      ).toObject
         ? (
             item.event as unknown as {
               toObject: () => Record<string, unknown>;
@@ -174,8 +176,7 @@ export class EventController {
       isFull: item.isFull,
       isRegistered: item.isRegistered,
       userRegistration: item.userRegistration as unknown as
-        | EventRegistrationResponseDto
-        | undefined,
+        EventRegistrationResponseDto | undefined,
     } as unknown as ClientEventResponseDto;
   }
 

@@ -6,7 +6,8 @@ import { ActiveStatus } from '../../../common/enums/active-status.enum';
 export class UpdateEventStatusDto {
   @ApiProperty({
     enum: ActiveStatus,
-    description: 'Active status (ACTIVE = published and open, DISABLED = draft/hidden)',
+    description:
+      'Active status (ACTIVE = published and open, DISABLED = draft/hidden)',
     example: ActiveStatus.ACTIVE,
   })
   @IsEnum(ActiveStatus, {

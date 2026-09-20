@@ -86,5 +86,8 @@
   "PROVINCE_REQUIRED_FOR_PROVINCIAL_EVENT": "تعیین استان برای رویدادهای استانی الزامی است",
   "FEEDBACK_NOT_FOUND": "پیام بازخورد یافت نشد",
   "GALLERY_IMAGE_NOT_FOUND": "تصویر گالری یافت نشد",
-  "CANNOT_REORDER_GALLERY_IMAGE": "امکان جابجایی تصویر گالری در جهت درخواستی وجود ندارد"
+  "CANNOT_REORDER_GALLERY_IMAGE": "امکان جابجایی تصویر گالری در جهت درخواستی وجود ندارد",
+  "PAGE_NOT_FOUND": "صفحه مورد نظر یافت نشد",
+  "PAGE_KEY_EXISTS": "صفحه‌ای با این شناسه قبلاً ثبت شده است",
+  "INVALID_PAGE_KEY": "شناسه صفحه نامعتبر است"
 }

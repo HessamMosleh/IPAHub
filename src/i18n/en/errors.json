@@ -86,5 +86,8 @@
   "PROVINCE_REQUIRED_FOR_PROVINCIAL_EVENT": "Province is required for provincial events",
   "FEEDBACK_NOT_FOUND": "Feedback message not found",
   "GALLERY_IMAGE_NOT_FOUND": "Gallery image not found",
-  "CANNOT_REORDER_GALLERY_IMAGE": "Cannot reorder gallery image in the requested direction"
+  "CANNOT_REORDER_GALLERY_IMAGE": "Cannot reorder gallery image in the requested direction",
+  "PAGE_NOT_FOUND": "Page not found",
+  "PAGE_KEY_EXISTS": "Page with this key already exists",
+  "INVALID_PAGE_KEY": "Invalid page key"
 }
