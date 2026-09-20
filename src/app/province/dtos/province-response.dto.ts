@@ -19,6 +19,15 @@ export class ProvinceResponseDto {
   @ApiPropertyOptional({ type: SocialLinksDto })
   socials?: SocialLinksDto;
 
+  @ApiPropertyOptional({ type: LocalizedTextDto })
+  contactAddress?: LocalizedTextDto;
+
+  @ApiPropertyOptional({ example: '+982188880000' })
+  contactPhone?: string;
+
+  @ApiPropertyOptional({ example: 'tehran@ipa.ir' })
+  contactEmail?: string;
+
   @ApiProperty({ enum: ActiveStatus, example: ActiveStatus.ACTIVE })
   status: ActiveStatus;
 

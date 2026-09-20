@@ -3,6 +3,7 @@ import { AdminListProvincesDto } from '../dtos/admin-list-provinces.dto';
 import { CreateProvinceDto } from '../dtos/create-province.dto';
 import { UpdateProvinceDto } from '../dtos/update-province.dto';
 import { UpdateProvinceSocialsDto } from '../dtos/update-province-socials.dto';
+import { UpdateProvinceContactDto } from '../dtos/update-province-contact.dto';
 import { ReorderProvinceDto } from '../dtos/reorder-province.dto';
 import { AuthenticatedUser } from '../../auth/types';
 
@@ -49,6 +50,16 @@ export interface IProvinceAdminService {
   updateSocials(
     id: string,
     dto: UpdateProvinceSocialsDto,
+    user?: AuthenticatedUser,
+  ): Promise<Province>;
+
+  /**
+   * Updates contact details for a province (address, phone, email) with validation and digit folding.
+   * Permitted for SUPER_ADMIN, ADMIN, or PROVINCE_ADMIN scoped to this province.
+   */
+  updateContact(
+    id: string,
+    dto: UpdateProvinceContactDto,
     user?: AuthenticatedUser,
   ): Promise<Province>;
 

@@ -10,13 +10,13 @@ import { User } from '../user/user.schema';
  */
 @Schema({ timestamps: true })
 export class MemberFeedback extends Document {
-  @Prop({ type: Types.ObjectId, ref: User.name })
+  @Prop({ type: Types.ObjectId, ref: User.name, required: true })
   user: User;
 
-  @Prop({ type: String })
-  subject: string;
+  @Prop({ type: String, trim: true })
+  subject?: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, required: true, trim: true })
   body: string;
 
   @Prop({ type: Boolean, default: false })
@@ -24,10 +24,13 @@ export class MemberFeedback extends Document {
 
   @Prop({ type: Date })
   createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt: Date;
 }
 
 export class MemberFeedbackProp {
-  static general = ['subject', 'body', 'resolved', 'createdAt'];
+  static general = ['subject', 'body', 'resolved', 'createdAt', 'updatedAt'];
 
   static admin = [...this.general, 'user'];
 }

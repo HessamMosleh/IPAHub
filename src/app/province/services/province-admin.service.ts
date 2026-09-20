@@ -7,13 +7,16 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, QueryFilter } from 'mongoose';
+import { isEmail } from 'class-validator';
 import {
   Province,
   ProvinceProp,
 } from '../../../common/schemas/province.schema';
+import { LocalizedText } from '../../../common/schemas/localized-text.schema';
 import { ActiveStatus } from '../../../common/enums/active-status.enum';
 import { UserRole } from '../../user/user.schema';
 import { translate } from '../../../common/utils/translate';
+import { foldDigits } from '../../../common/utils/digit.util';
 import {
   normalizeSocialUrl,
   normalizeWhatsapp,
@@ -23,6 +26,7 @@ import { AdminListProvincesDto } from '../dtos/admin-list-provinces.dto';
 import { CreateProvinceDto } from '../dtos/create-province.dto';
 import { UpdateProvinceDto } from '../dtos/update-province.dto';
 import { UpdateProvinceSocialsDto } from '../dtos/update-province-socials.dto';
+import { UpdateProvinceContactDto } from '../dtos/update-province-contact.dto';
 import {
   ReorderDirection,
   ReorderProvinceDto,
@@ -155,6 +159,36 @@ export class ProvinceAdminService implements IProvinceAdminService {
         }
       : undefined;
 
+    let contactAddress: LocalizedText | undefined;
+    if (dto.contactAddress) {
+      const en = dto.contactAddress.en?.trim();
+      const fa = dto.contactAddress.fa?.trim();
+      if (en || fa) {
+        contactAddress = {
+          en: en ?? '',
+          ...(fa ? { fa } : {}),
+        };
+      }
+    }
+
+    let contactPhone: string | undefined;
+    if (dto.contactPhone && dto.contactPhone.trim()) {
+      const folded = foldDigits(dto.contactPhone).trim();
+      if (!/\d/.test(folded)) {
+        throw new BadRequestException(translate('errors.INVALID_PHONE'));
+      }
+      contactPhone = folded;
+    }
+
+    let contactEmail: string | undefined;
+    if (dto.contactEmail && dto.contactEmail.trim()) {
+      const trimmedEmail = dto.contactEmail.trim();
+      if (!isEmail(trimmedEmail)) {
+        throw new BadRequestException(translate('errors.INVALID_EMAIL'));
+      }
+      contactEmail = trimmedEmail;
+    }
+
     return this.provinceModel.create({
       slug: normalizedSlug,
       name: {
@@ -163,6 +197,9 @@ export class ProvinceAdminService implements IProvinceAdminService {
       },
       order,
       socials,
+      contactAddress,
+      contactPhone,
+      contactEmail,
       status: dto.status ?? ActiveStatus.ACTIVE,
     });
   }
@@ -211,6 +248,46 @@ export class ProvinceAdminService implements IProvinceAdminService {
       };
     }
 
+    if (dto.contactAddress !== undefined) {
+      if (
+        dto.contactAddress === null ||
+        (!dto.contactAddress.en?.trim() && !dto.contactAddress.fa?.trim())
+      ) {
+        province.contactAddress = undefined;
+      } else {
+        province.contactAddress = {
+          en: dto.contactAddress.en?.trim() ?? '',
+          ...(dto.contactAddress.fa?.trim()
+            ? { fa: dto.contactAddress.fa.trim() }
+            : {}),
+        };
+      }
+    }
+
+    if (dto.contactPhone !== undefined) {
+      if (dto.contactPhone === null || dto.contactPhone.trim() === '') {
+        province.contactPhone = undefined;
+      } else {
+        const folded = foldDigits(dto.contactPhone).trim();
+        if (!/\d/.test(folded)) {
+          throw new BadRequestException(translate('errors.INVALID_PHONE'));
+        }
+        province.contactPhone = folded;
+      }
+    }
+
+    if (dto.contactEmail !== undefined) {
+      if (dto.contactEmail === null || dto.contactEmail.trim() === '') {
+        province.contactEmail = undefined;
+      } else {
+        const trimmedEmail = dto.contactEmail.trim();
+        if (!isEmail(trimmedEmail)) {
+          throw new BadRequestException(translate('errors.INVALID_EMAIL'));
+        }
+        province.contactEmail = trimmedEmail;
+      }
+    }
+
     return province.save();
   }
 
@@ -236,6 +313,70 @@ export class ProvinceAdminService implements IProvinceAdminService {
       telegram: normalizeSocialUrl(dto.telegram),
       whatsapp: normalizeWhatsapp(dto.whatsapp),
     };
+
+    return province.save();
+  }
+
+  /**
+   * Updates contact details for a province (address, phone, email).
+   * Validates email format, folds phone digits to ASCII, and ensures phone contains digits.
+   * Permitted for SUPER_ADMIN, ADMIN, or PROVINCE_ADMIN scoped to this province.
+   */
+  async updateContact(
+    id: string,
+    dto: UpdateProvinceContactDto,
+    user?: AuthenticatedUser,
+  ): Promise<Province> {
+    this.assertProvinceScope(id, user);
+
+    const province = await this.provinceModel.findById(id).exec();
+    if (!province) {
+      throw new NotFoundException(translate('errors.PROVINCE_NOT_FOUND'));
+    }
+
+    const rawAddress =
+      dto.contactAddress !== undefined ? dto.contactAddress : dto.address;
+    if (rawAddress !== undefined) {
+      if (
+        rawAddress === null ||
+        (!rawAddress.en?.trim() && !rawAddress.fa?.trim())
+      ) {
+        province.contactAddress = undefined;
+      } else {
+        province.contactAddress = {
+          en: rawAddress.en?.trim() ?? '',
+          ...(rawAddress.fa?.trim() ? { fa: rawAddress.fa.trim() } : {}),
+        };
+      }
+    }
+
+    const rawPhone =
+      dto.contactPhone !== undefined ? dto.contactPhone : dto.phone;
+    if (rawPhone !== undefined) {
+      if (rawPhone === null || rawPhone.trim() === '') {
+        province.contactPhone = undefined;
+      } else {
+        const folded = foldDigits(rawPhone).trim();
+        if (!/\d/.test(folded)) {
+          throw new BadRequestException(translate('errors.INVALID_PHONE'));
+        }
+        province.contactPhone = folded;
+      }
+    }
+
+    const rawEmail =
+      dto.contactEmail !== undefined ? dto.contactEmail : dto.email;
+    if (rawEmail !== undefined) {
+      if (rawEmail === null || rawEmail.trim() === '') {
+        province.contactEmail = undefined;
+      } else {
+        const trimmedEmail = rawEmail.trim();
+        if (!isEmail(trimmedEmail)) {
+          throw new BadRequestException(translate('errors.INVALID_EMAIL'));
+        }
+        province.contactEmail = trimmedEmail;
+      }
+    }
 
     return province.save();
   }

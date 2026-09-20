@@ -31,6 +31,7 @@ import { AdminListProvincesDto } from '../dtos/admin-list-provinces.dto';
 import { CreateProvinceDto } from '../dtos/create-province.dto';
 import { UpdateProvinceDto } from '../dtos/update-province.dto';
 import { UpdateProvinceSocialsDto } from '../dtos/update-province-socials.dto';
+import { UpdateProvinceContactDto } from '../dtos/update-province-contact.dto';
 import { ReorderProvinceDto } from '../dtos/reorder-province.dto';
 import {
   PaginatedProvincesResponseDto,
@@ -154,6 +155,32 @@ export class ProvinceAdminController {
     @GetUser() user: AuthenticatedUser,
   ): Promise<ProvinceResponseDto> {
     const province = await this.provinceAdminService.updateSocials(
+      id,
+      dto,
+      user,
+    );
+    return province as unknown as ProvinceResponseDto;
+  }
+
+  @Patch(':id/contact')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.PROVINCE_ADMIN)
+  @ApiOperation({
+    summary:
+      'Update province contact details (accessible to Super Admin, Admin, and assigned Province Admin)',
+  })
+  @ApiParam({ name: 'id', example: '66fa3b5a9c1e7a001f3e9a11' })
+  @ApiOkResponse({
+    type: ProvinceResponseDto,
+    description: 'The province with updated contact details.',
+  })
+  @ApiNotFoundResponse({ description: 'Province not found.' })
+  @ApiForbiddenResponse({ description: 'Outside assigned province scope.' })
+  async updateContact(
+    @Param('id') id: string,
+    @Body() dto: UpdateProvinceContactDto,
+    @GetUser() user: AuthenticatedUser,
+  ): Promise<ProvinceResponseDto> {
+    const province = await this.provinceAdminService.updateContact(
       id,
       dto,
       user,

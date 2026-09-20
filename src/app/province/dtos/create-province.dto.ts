@@ -54,6 +54,31 @@ export class CreateProvinceDto {
   socials?: SocialLinksDto;
 
   @ApiPropertyOptional({
+    type: LocalizedTextDto,
+    description: 'Bilingual contact address of the province office',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => LocalizedTextDto)
+  contactAddress?: LocalizedTextDto;
+
+  @ApiPropertyOptional({
+    description: 'Contact phone number of the province office',
+    example: '02188880000',
+  })
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage('validation.IS_STRING') })
+  contactPhone?: string;
+
+  @ApiPropertyOptional({
+    description: 'Contact email address of the province office',
+    example: 'tehran@ipa.ir',
+  })
+  @IsOptional()
+  @IsString({ message: i18nValidationMessage('validation.IS_STRING') })
+  contactEmail?: string;
+
+  @ApiPropertyOptional({
     enum: ActiveStatus,
     default: ActiveStatus.ACTIVE,
   })

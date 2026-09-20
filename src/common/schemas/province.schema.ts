@@ -27,6 +27,23 @@ export class Province extends Document {
   @Prop({ type: SocialLinksSchema })
   socials?: SocialLinks;
 
+  /**
+   * This province's own contact details, shown on its public page. All three
+   * are optional and independent: a province may publish a phone and nothing
+   * else, and most rows have none of them.
+   *
+   * Split the way ContactInfo splits the national ones: the address is
+   * bilingual content, while phone and email are plain scalars.
+   */
+  @Prop({ type: LocalizedTextSchema })
+  contactAddress?: LocalizedText;
+
+  @Prop({ type: String })
+  contactPhone?: string;
+
+  @Prop({ type: String })
+  contactEmail?: string;
+
   @Prop({ type: String, enum: ActiveStatus, default: ActiveStatus.ACTIVE })
   status: ActiveStatus;
 
@@ -35,7 +52,16 @@ export class Province extends Document {
 }
 
 export class ProvinceProp {
-  static general = ['slug', 'name', 'order', 'socials', 'createdAt'];
+  static general = [
+    'slug',
+    'name',
+    'order',
+    'socials',
+    'contactAddress',
+    'contactPhone',
+    'contactEmail',
+    'createdAt',
+  ];
 
   static admin = [...this.general, 'status'];
 }
