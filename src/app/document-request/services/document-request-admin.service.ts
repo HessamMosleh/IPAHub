@@ -36,6 +36,8 @@ import { AdminListDocumentRequestsDto } from '../dtos/admin-list-document-reques
 import { RejectDocumentRequestDto } from '../dtos/reject-document-request.dto';
 import { FulfillDocumentRequestDto } from '../dtos/fulfill-document-request.dto';
 import { MarkPaidDocumentRequestDto } from '../dtos/mark-paid-document-request.dto';
+import { MembershipCardService } from '../../membership/services/membership-card.service';
+import { MembershipCard } from '../../membership/schemas/membership-card.schema';
 
 /**
  * Administrative Document Request Service.
@@ -54,6 +56,7 @@ export class DocumentRequestAdminService implements IDocumentRequestAdminService
     private readonly userModel: Model<User>,
     @InjectModel(Payment.name)
     private readonly paymentModel: Model<Payment>,
+    private readonly membershipCardService: MembershipCardService,
   ) {}
 
   /**
@@ -247,6 +250,18 @@ export class DocumentRequestAdminService implements IDocumentRequestAdminService
     request.rejectionReason = undefined as unknown as string;
 
     await request.save();
+
+    if (request.fee === 0) {
+      await this.tryIssueCard(request._id.toString());
+      const updated = await this.documentRequestModel
+        .findById(id)
+        .select(DocumentRequestProp.admin)
+        .populate('user', UserProp.admin)
+        .populate('requestType', RequestTypeProp.admin)
+        .exec();
+      return updated ?? request;
+    }
+
     return request;
   }
 
@@ -405,7 +420,16 @@ export class DocumentRequestAdminService implements IDocumentRequestAdminService
 
     request.paymentStatus = PaymentStatus.PAID;
     await request.save();
-    return request;
+
+    await this.tryIssueCard(request._id.toString());
+    const updated = await this.documentRequestModel
+      .findById(id)
+      .select(DocumentRequestProp.admin)
+      .populate('user', UserProp.admin)
+      .populate('requestType', RequestTypeProp.admin)
+      .exec();
+
+    return updated ?? request;
   }
 
   /**
@@ -430,6 +454,91 @@ export class DocumentRequestAdminService implements IDocumentRequestAdminService
 
     await this.documentRequestModel.findByIdAndDelete(id).exec();
     return { success: true };
+  }
+
+  /**
+   * Generates or regenerates a membership card for an accepted document request.
+   */
+  async generateCard(
+    id: string,
+    admin?: AuthenticatedUser,
+  ): Promise<DocumentRequest> {
+    const request = await this.documentRequestModel
+      .findById(id)
+      .select(DocumentRequestProp.admin)
+      .populate('user', UserProp.admin)
+      .populate('requestType', RequestTypeProp.admin)
+      .exec();
+
+    if (!request) {
+      throw new NotFoundException(
+        translate('errors.DOCUMENT_REQUEST_NOT_FOUND'),
+      );
+    }
+
+    this.assertProvinceScope(request.user?.province, admin);
+
+    const card = await this.membershipCardService.issueCard(id, {
+      force: true,
+    });
+    if (!card) {
+      throw new BadRequestException(
+        translate('errors.DOCUMENT_REQUEST_NOT_ACCEPTED'),
+      );
+    }
+
+    const updated = await this.documentRequestModel
+      .findById(id)
+      .select(DocumentRequestProp.admin)
+      .populate('user', UserProp.admin)
+      .populate('requestType', RequestTypeProp.admin)
+      .exec();
+
+    return updated ?? request;
+  }
+
+  /**
+   * Retrieves the generated membership card for a document request.
+   */
+  async getCard(
+    id: string,
+    admin?: AuthenticatedUser,
+  ): Promise<MembershipCard> {
+    const request = await this.documentRequestModel
+      .findById(id)
+      .select(DocumentRequestProp.admin)
+      .populate('user', UserProp.admin)
+      .exec();
+
+    if (!request) {
+      throw new NotFoundException(
+        translate('errors.DOCUMENT_REQUEST_NOT_FOUND'),
+      );
+    }
+
+    this.assertProvinceScope(request.user?.province, admin);
+
+    const card = await this.membershipCardService.findByRequestId(id);
+    if (!card) {
+      throw new NotFoundException(
+        translate('errors.DOCUMENT_REQUEST_NOT_FOUND'),
+      );
+    }
+
+    return card;
+  }
+
+  /**
+   * Issuance must not take down the surrounding accept or markPaid action:
+   * the member has already paid or been accepted. On failure the request
+   * stays ACCEPTED so an admin can retry via generateCard.
+   */
+  private async tryIssueCard(requestId: string): Promise<void> {
+    try {
+      await this.membershipCardService.issueCard(requestId);
+    } catch {
+      // Intentionally absorbed — leave request ACCEPTED for admin retry
+    }
   }
 
   /**

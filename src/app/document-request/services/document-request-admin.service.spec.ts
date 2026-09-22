@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DocumentRequestAdminService } from './document-request-admin.service';
+import { MembershipCardService } from '../../membership/services/membership-card.service';
 import {
   DocumentRequest,
   DocumentRequestStatus,
@@ -40,6 +41,15 @@ describe('DocumentRequestAdminService', () => {
   let mockRequestTypeModel: ReturnType<typeof buildRequestTypeModelMock>;
   let mockUserModel: ReturnType<typeof buildUserModelMock>;
   let mockPaymentModel: ReturnType<typeof buildPaymentModelMock>;
+  let mockMembershipCardService: {
+    issueCard: jest.Mock;
+    findByRequestId: jest.Mock;
+    findByUserId: jest.Mock;
+    findLatestByUserId: jest.Mock;
+    findById: jest.Mock;
+    findAll: jest.Mock;
+    getCardSvg: jest.Mock;
+  };
 
   const superAdmin: AuthenticatedUser = {
     id: '507f1f77bcf86cd799439088',
@@ -63,6 +73,15 @@ describe('DocumentRequestAdminService', () => {
     mockRequestTypeModel = buildRequestTypeModelMock();
     mockUserModel = buildUserModelMock();
     mockPaymentModel = buildPaymentModelMock();
+    mockMembershipCardService = {
+      issueCard: jest.fn(),
+      findByRequestId: jest.fn(),
+      findByUserId: jest.fn(),
+      findLatestByUserId: jest.fn(),
+      findById: jest.fn(),
+      findAll: jest.fn(),
+      getCardSvg: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -82,6 +101,10 @@ describe('DocumentRequestAdminService', () => {
         {
           provide: getModelToken(Payment.name),
           useValue: mockPaymentModel,
+        },
+        {
+          provide: MembershipCardService,
+          useValue: mockMembershipCardService,
         },
       ],
     }).compile();
@@ -220,6 +243,23 @@ describe('DocumentRequestAdminService', () => {
       expect(result.status).toBe(DocumentRequestStatus.ACCEPTED);
       expect(result.paymentStatus).toBe(PaymentStatus.NONE);
       expect(request.save).toHaveBeenCalled();
+    });
+
+    it('issues a card automatically if accepted request has zero fee', async () => {
+      const user = buildUserFixture();
+      const request = buildDocumentRequest({
+        user,
+        fee: 0,
+        status: DocumentRequestStatus.PENDING,
+      });
+      mockDocRequestModel.findById.mockReturnValue(buildQueryChain(request));
+      mockMembershipCardService.issueCard.mockResolvedValue({});
+
+      await service.accept(FIXED_REQUEST_ID, superAdmin);
+
+      expect(mockMembershipCardService.issueCard).toHaveBeenCalledWith(
+        FIXED_REQUEST_ID,
+      );
     });
 
     it('throws BadRequestException if request is already decided (not PENDING)', async () => {
@@ -403,7 +443,7 @@ describe('DocumentRequestAdminService', () => {
         expect.objectContaining({
           amount: 500000,
           source: PaymentSource.REQUEST,
-          sourceId: request._id,
+          sourceId: FIXED_REQUEST_ID,
           user: user._id,
           province: FIXED_PROVINCE_ID,
           method: PaymentMethod.OFFLINE,
@@ -412,6 +452,9 @@ describe('DocumentRequestAdminService', () => {
         }),
       );
       expect(request.save).toHaveBeenCalled();
+      expect(mockMembershipCardService.issueCard).toHaveBeenCalledWith(
+        FIXED_REQUEST_ID,
+      );
     });
 
     it('throws BadRequestException if request is not in ACCEPTED status', async () => {
@@ -465,6 +508,65 @@ describe('DocumentRequestAdminService', () => {
 
       await expect(
         service.delete(FIXED_REQUEST_ID, superAdmin),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('generateCard', () => {
+    it('issues card with force: true and returns updated request', async () => {
+      const user = buildUserFixture({ province: FIXED_PROVINCE_ID });
+      const request = buildDocumentRequest({
+        user,
+        status: DocumentRequestStatus.ACCEPTED,
+        paymentStatus: PaymentStatus.PAID,
+      });
+      mockDocRequestModel.findById.mockReturnValue(buildQueryChain(request));
+      mockMembershipCardService.issueCard.mockResolvedValue({});
+
+      const result = await service.generateCard(FIXED_REQUEST_ID, superAdmin);
+
+      expect(mockMembershipCardService.issueCard).toHaveBeenCalledWith(
+        FIXED_REQUEST_ID,
+        { force: true },
+      );
+      expect(result).toBeDefined();
+    });
+
+    it('throws BadRequestException if card issuance returns null', async () => {
+      const user = buildUserFixture({ province: FIXED_PROVINCE_ID });
+      const request = buildDocumentRequest({ user });
+      mockDocRequestModel.findById.mockReturnValue(buildQueryChain(request));
+      mockMembershipCardService.issueCard.mockResolvedValue(null);
+
+      await expect(
+        service.generateCard(FIXED_REQUEST_ID, superAdmin),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('getCard', () => {
+    it('returns the issued card for the request', async () => {
+      const user = buildUserFixture({ province: FIXED_PROVINCE_ID });
+      const request = buildDocumentRequest({ user });
+      mockDocRequestModel.findById.mockReturnValue(buildQueryChain(request));
+      const card = { _id: 'card-1' };
+      mockMembershipCardService.findByRequestId.mockResolvedValue(card);
+
+      const result = await service.getCard(FIXED_REQUEST_ID, superAdmin);
+      expect(result).toBe(card);
+      expect(mockMembershipCardService.findByRequestId).toHaveBeenCalledWith(
+        FIXED_REQUEST_ID,
+      );
+    });
+
+    it('throws NotFoundException if card does not exist', async () => {
+      const user = buildUserFixture({ province: FIXED_PROVINCE_ID });
+      const request = buildDocumentRequest({ user });
+      mockDocRequestModel.findById.mockReturnValue(buildQueryChain(request));
+      mockMembershipCardService.findByRequestId.mockResolvedValue(null);
+
+      await expect(
+        service.getCard(FIXED_REQUEST_ID, superAdmin),
       ).rejects.toThrow(NotFoundException);
     });
   });

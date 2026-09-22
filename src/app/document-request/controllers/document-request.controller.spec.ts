@@ -25,6 +25,7 @@ describe('DocumentRequestController', () => {
     create: jest.Mock;
     findAllByUser: jest.Mock;
     findByIdAndUser: jest.Mock;
+    getCard: jest.Mock;
   };
   let mockUser: AuthenticatedUser;
 
@@ -34,6 +35,7 @@ describe('DocumentRequestController', () => {
       create: jest.fn(),
       findAllByUser: jest.fn(),
       findByIdAndUser: jest.fn(),
+      getCard: jest.fn(),
     };
     mockUser = buildMockUser();
 
@@ -118,5 +120,18 @@ describe('DocumentRequestController', () => {
       FIXED_USER_ID,
     );
     expect(result).toEqual(expected);
+  });
+
+  it('gets card delegating to service.getCard', async () => {
+    const card = { _id: 'card-1' };
+    mockService.getCard.mockResolvedValue(card);
+
+    const result = await controller.getCard(FIXED_REQUEST_ID, mockUser);
+
+    expect(mockService.getCard).toHaveBeenCalledWith(
+      FIXED_REQUEST_ID,
+      FIXED_USER_ID,
+    );
+    expect(result).toEqual(card);
   });
 });

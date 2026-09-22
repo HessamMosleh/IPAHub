@@ -29,6 +29,7 @@ import { MembershipType } from '../../../common/enums/membership-type.enum';
 import { GetUser } from '../../auth/decorators/get-user.decorator';
 import type { AuthenticatedUser } from '../../auth/types';
 import { MembershipAdminService } from '../services/membership-admin.service';
+import { MembershipCardService } from '../services/membership-card.service';
 import { AdminListMembershipRequestsDto } from '../dtos/admin-list-membership-requests.dto';
 import { RejectMembershipRequestDto } from '../dtos/reject-membership-request.dto';
 import { MarkPaidMembershipRequestDto } from '../dtos/mark-paid-membership-request.dto';
@@ -41,6 +42,9 @@ import {
 } from '../dtos/membership-request-response.dto';
 import { MembershipFeeResponseDto } from '../dtos/membership-fee-response.dto';
 import { MembershipTypeInfoResponseDto } from '../dtos/membership-type-info-response.dto';
+import { MembershipCardResponseDto } from '../dtos/membership-card-response.dto';
+import { NotFoundException } from '@nestjs/common';
+import { translate } from '../../../common/utils/translate';
 
 /**
  * Administrative Membership Controller.
@@ -55,6 +59,7 @@ import { MembershipTypeInfoResponseDto } from '../dtos/membership-type-info-resp
 export class MembershipAdminController {
   constructor(
     private readonly membershipAdminService: MembershipAdminService,
+    private readonly membershipCardService: MembershipCardService,
   ) {}
 
   // --- Requests -------------------------------------------------------------
@@ -233,5 +238,60 @@ export class MembershipAdminController {
   ): Promise<MembershipRequestResponseDto> {
     const request = await this.membershipAdminService.markPaid(id, dto, user);
     return request as unknown as MembershipRequestResponseDto;
+  }
+
+  // --- Membership Cards -----------------------------------------------------
+
+  @Get('cards')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.PROVINCE_ADMIN)
+  @ApiOperation({ summary: 'List all generated membership cards' })
+  @ApiOkResponse({ type: [MembershipCardResponseDto] })
+  async findAllCards(): Promise<MembershipCardResponseDto[]> {
+    const cards = await this.membershipCardService.findAll();
+    return cards as unknown as MembershipCardResponseDto[];
+  }
+
+  @Get('cards/:id')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.PROVINCE_ADMIN)
+  @ApiOperation({ summary: 'Get membership card by card MongoDB ObjectId' })
+  @ApiParam({ name: 'id', example: '66fa3b5a9c1e7a001f3e9a11' })
+  @ApiOkResponse({ type: MembershipCardResponseDto })
+  @ApiNotFoundResponse({ description: 'Membership card not found.' })
+  async findCardById(
+    @Param('id') id: string,
+  ): Promise<MembershipCardResponseDto> {
+    const card = await this.membershipCardService.findById(id);
+    if (!card) {
+      throw new NotFoundException(
+        translate('errors.DOCUMENT_REQUEST_NOT_FOUND'),
+      );
+    }
+    return card as unknown as MembershipCardResponseDto;
+  }
+
+  @Post('cards/generate/:requestId')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.PROVINCE_ADMIN)
+  @ApiOperation({
+    summary:
+      'Generate or regenerate a membership card for an accepted document request',
+  })
+  @ApiParam({ name: 'requestId', example: '66fa3b5a9c1e7a001f3e9a11' })
+  @ApiOkResponse({ type: MembershipCardResponseDto })
+  @ApiBadRequestResponse({
+    description:
+      'Request is not ready, or member profile is missing required card fields.',
+  })
+  async generateCard(
+    @Param('requestId') requestId: string,
+  ): Promise<MembershipCardResponseDto> {
+    const card = await this.membershipCardService.issueCard(requestId, {
+      force: true,
+    });
+    if (!card) {
+      throw new NotFoundException(
+        translate('errors.DOCUMENT_REQUEST_NOT_FOUND'),
+      );
+    }
+    return card as unknown as MembershipCardResponseDto;
   }
 }

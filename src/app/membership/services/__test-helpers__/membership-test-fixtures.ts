@@ -73,6 +73,7 @@ export const buildUserFixture = (overrides: Record<string, any> = {}) => ({
   membershipNo: 1001,
   membershipExpiresAt: new Date('2027-01-01T00:00:00.000Z'),
   entranceFeeSettledAt: null,
+  rejectionReason: undefined as string | undefined,
   save: jest.fn().mockResolvedValue(true),
   ...overrides,
 });
@@ -193,6 +194,14 @@ export const buildUserModelMock = () => ({
 export const buildMemberDocumentModelMock = () => ({
   find: jest.fn(),
   findOne: jest.fn(),
+});
+
+export const buildMembershipCardModelMock = () => ({
+  find: jest.fn(),
+  findOne: jest.fn(),
+  findById: jest.fn(),
+  findOneAndUpdate: jest.fn(),
+  create: jest.fn(),
 });
 
 export const buildProvinceModelMock = () => ({

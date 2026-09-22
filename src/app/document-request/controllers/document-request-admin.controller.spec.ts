@@ -28,6 +28,8 @@ describe('DocumentRequestAdminController', () => {
     fulfill: jest.Mock;
     markPaid: jest.Mock;
     delete: jest.Mock;
+    generateCard: jest.Mock;
+    getCard: jest.Mock;
   };
   let mockAdmin: AuthenticatedUser;
 
@@ -40,6 +42,8 @@ describe('DocumentRequestAdminController', () => {
       fulfill: jest.fn(),
       markPaid: jest.fn(),
       delete: jest.fn(),
+      generateCard: jest.fn(),
+      getCard: jest.fn(),
     };
     mockAdmin = buildMockAdmin();
 
@@ -170,5 +174,33 @@ describe('DocumentRequestAdminController', () => {
       mockAdmin,
     );
     expect(result).toEqual({ success: true });
+  });
+
+  it('generates card delegating to service.generateCard', async () => {
+    const expected = buildDocumentRequest({
+      status: DocumentRequestStatus.COMPLETED,
+    });
+    mockAdminService.generateCard.mockResolvedValue(expected);
+
+    const result = await controller.generateCard(FIXED_REQUEST_ID, mockAdmin);
+
+    expect(mockAdminService.generateCard).toHaveBeenCalledWith(
+      FIXED_REQUEST_ID,
+      mockAdmin,
+    );
+    expect(result).toEqual(expected);
+  });
+
+  it('gets card delegating to service.getCard', async () => {
+    const card = { _id: 'card-1' };
+    mockAdminService.getCard.mockResolvedValue(card);
+
+    const result = await controller.getCard(FIXED_REQUEST_ID, mockAdmin);
+
+    expect(mockAdminService.getCard).toHaveBeenCalledWith(
+      FIXED_REQUEST_ID,
+      mockAdmin,
+    );
+    expect(result).toEqual(card);
   });
 });

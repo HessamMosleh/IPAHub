@@ -23,6 +23,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from '../../auth/decorators/get-user.decorator';
 import type { AuthenticatedUser } from '../../auth/types';
 import { MembershipService } from '../services/membership.service';
+import { MembershipCardService } from '../services/membership-card.service';
 import { SubmitMembershipRequestDto } from '../dtos/submit-membership-request.dto';
 import { ListMembershipRequestsDto } from '../dtos/list-membership-requests.dto';
 import { MembershipOptionsResponseDto } from '../dtos/membership-option-response.dto';
@@ -30,6 +31,9 @@ import {
   MembershipRequestResponseDto,
   PaginatedMembershipRequestsResponseDto,
 } from '../dtos/membership-request-response.dto';
+import { MembershipCardResponseDto } from '../dtos/membership-card-response.dto';
+import { NotFoundException } from '@nestjs/common';
+import { translate } from '../../../common/utils/translate';
 
 /**
  * Public/Member Client Membership Controller.
@@ -41,7 +45,10 @@ import {
 @UseGuards(AuthGuard('jwt'))
 @Controller('membership')
 export class MembershipController {
-  constructor(private readonly membershipService: MembershipService) {}
+  constructor(
+    private readonly membershipService: MembershipService,
+    private readonly membershipCardService: MembershipCardService,
+  ) {}
 
   @Get('options')
   @ApiOperation({
@@ -121,5 +128,61 @@ export class MembershipController {
   ): Promise<MembershipRequestResponseDto> {
     const request = await this.membershipService.findByIdAndUser(id, user.id);
     return request as unknown as MembershipRequestResponseDto;
+  }
+
+  // --- Membership Cards -----------------------------------------------------
+
+  @Get('card')
+  @ApiOperation({
+    summary: "Get current authenticated member's latest issued membership card",
+  })
+  @ApiOkResponse({ type: MembershipCardResponseDto })
+  @ApiNotFoundResponse({ description: 'No issued membership card found.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async getMyCard(
+    @GetUser() user: AuthenticatedUser,
+  ): Promise<MembershipCardResponseDto> {
+    const card = await this.membershipCardService.findLatestByUserId(user.id);
+    if (!card) {
+      throw new NotFoundException(
+        translate('errors.DOCUMENT_REQUEST_NOT_FOUND'),
+      );
+    }
+    return card as unknown as MembershipCardResponseDto;
+  }
+
+  @Get('cards')
+  @ApiOperation({
+    summary:
+      'List all issued membership cards for current authenticated member',
+  })
+  @ApiOkResponse({ type: [MembershipCardResponseDto] })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async getMyCards(
+    @GetUser() user: AuthenticatedUser,
+  ): Promise<MembershipCardResponseDto[]> {
+    const cards = await this.membershipCardService.findByUserId(user.id);
+    return cards as unknown as MembershipCardResponseDto[];
+  }
+
+  @Get('cards/:id')
+  @ApiOperation({
+    summary: "Get one of the authenticated member's own membership cards by ID",
+  })
+  @ApiParam({ name: 'id', example: '66fa3b5a9c1e7a001f3e9a11' })
+  @ApiOkResponse({ type: MembershipCardResponseDto })
+  @ApiNotFoundResponse({ description: 'Membership card not found.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async findCardById(
+    @Param('id') id: string,
+    @GetUser() user: AuthenticatedUser,
+  ): Promise<MembershipCardResponseDto> {
+    const card = await this.membershipCardService.findByIdForUser(id, user.id);
+    if (!card) {
+      throw new NotFoundException(
+        translate('errors.DOCUMENT_REQUEST_NOT_FOUND'),
+      );
+    }
+    return card as unknown as MembershipCardResponseDto;
   }
 }

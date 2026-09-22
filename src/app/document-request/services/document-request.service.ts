@@ -32,6 +32,8 @@ import {
   DocumentRequestOptionDto,
   DocumentRequestOptionsResponseDto,
 } from '../dtos/document-request-options-response.dto';
+import { MembershipCardService } from '../../membership/services/membership-card.service';
+import { MembershipCard } from '../../membership/schemas/membership-card.schema';
 
 /**
  * Public/Member Client Document Request Service.
@@ -48,6 +50,7 @@ export class DocumentRequestService implements IDocumentRequestService {
     private readonly requestTypeModel: Model<RequestType>,
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
+    private readonly membershipCardService: MembershipCardService,
   ) {}
 
   /**
@@ -223,5 +226,32 @@ export class DocumentRequestService implements IDocumentRequestService {
     }
 
     return request;
+  }
+
+  /**
+   * Retrieves the issued membership card for a document request owned by the authenticated member.
+   */
+  async getCard(id: string, userId: string): Promise<MembershipCard> {
+    const request = await this.documentRequestModel
+      .findOne({
+        _id: new Types.ObjectId(id),
+        user: new Types.ObjectId(userId),
+      })
+      .exec();
+
+    if (!request) {
+      throw new NotFoundException(
+        translate('errors.DOCUMENT_REQUEST_NOT_FOUND'),
+      );
+    }
+
+    const card = await this.membershipCardService.findByRequestId(id);
+    if (!card) {
+      throw new NotFoundException(
+        translate('errors.DOCUMENT_REQUEST_NOT_FOUND'),
+      );
+    }
+
+    return card;
   }
 }

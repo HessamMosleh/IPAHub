@@ -35,7 +35,7 @@ describe('PageAdminService', () => {
     }).compile();
 
     service = module.get<PageAdminService>(PageAdminService);
-    });
+  });
 
   describe('findAll', () => {
     it('returns paginated pages with admin props', async () => {

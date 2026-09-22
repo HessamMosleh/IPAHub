@@ -30,7 +30,7 @@ describe('PageService', () => {
     }).compile();
 
     service = module.get<PageService>(PageService);
-    });
+  });
 
   describe('findAll', () => {
     it('returns all pages with general props sorted by key ascending', async () => {

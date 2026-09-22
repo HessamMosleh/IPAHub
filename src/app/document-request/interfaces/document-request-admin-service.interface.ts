@@ -1,4 +1,5 @@
 import { DocumentRequest } from '../document-request.schema';
+import { MembershipCard } from '../../membership/schemas/membership-card.schema';
 import { AdminListDocumentRequestsDto } from '../dtos/admin-list-document-requests.dto';
 import { RejectDocumentRequestDto } from '../dtos/reject-document-request.dto';
 import { FulfillDocumentRequestDto } from '../dtos/fulfill-document-request.dto';
@@ -71,4 +72,14 @@ export interface IDocumentRequestAdminService {
    * Deletes a document request.
    */
   delete(id: string, admin?: AuthenticatedUser): Promise<{ success: boolean }>;
+
+  /**
+   * Generates or regenerates a membership card for an accepted document request.
+   */
+  generateCard(id: string, admin?: AuthenticatedUser): Promise<DocumentRequest>;
+
+  /**
+   * Retrieves the generated membership card for a document request.
+   */
+  getCard(id: string, admin?: AuthenticatedUser): Promise<MembershipCard>;
 }

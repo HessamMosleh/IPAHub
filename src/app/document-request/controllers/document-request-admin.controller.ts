@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -34,6 +35,7 @@ import {
   DocumentRequestResponseDto,
   PaginatedDocumentRequestsResponseDto,
 } from '../dtos/document-request-response.dto';
+import { MembershipCardResponseDto } from '../../membership/dtos/membership-card-response.dto';
 
 /**
  * Administrative Document Request Controller.
@@ -216,5 +218,54 @@ export class DocumentRequestAdminController {
     @GetUser() user: AuthenticatedUser,
   ): Promise<{ success: boolean }> {
     return this.documentRequestAdminService.delete(id, user);
+  }
+
+  @Post(':id/generate-card')
+  @ApiOperation({
+    summary:
+      'Generate or regenerate a membership card for an accepted document request',
+  })
+  @ApiParam({ name: 'id', example: '66fa3b5a9c1e7a001f3e9a11' })
+  @ApiOkResponse({
+    type: DocumentRequestResponseDto,
+    description: 'The updated document request with COMPLETED status.',
+  })
+  @ApiBadRequestResponse({
+    description:
+      'Request is not ready, or member profile is missing required card fields.',
+  })
+  @ApiNotFoundResponse({ description: 'Document request not found.' })
+  @ApiForbiddenResponse({ description: 'Outside assigned province scope.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async generateCard(
+    @Param('id') id: string,
+    @GetUser() user: AuthenticatedUser,
+  ): Promise<DocumentRequestResponseDto> {
+    const request = await this.documentRequestAdminService.generateCard(
+      id,
+      user,
+    );
+    return request as unknown as DocumentRequestResponseDto;
+  }
+
+  @Get(':id/card')
+  @ApiOperation({
+    summary:
+      'Get the generated membership card for an administrative document request',
+  })
+  @ApiParam({ name: 'id', example: '66fa3b5a9c1e7a001f3e9a11' })
+  @ApiOkResponse({
+    type: MembershipCardResponseDto,
+    description: 'The generated membership card.',
+  })
+  @ApiNotFoundResponse({ description: 'Document request or card not found.' })
+  @ApiForbiddenResponse({ description: 'Outside assigned province scope.' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async getCard(
+    @Param('id') id: string,
+    @GetUser() user: AuthenticatedUser,
+  ): Promise<MembershipCardResponseDto> {
+    const card = await this.documentRequestAdminService.getCard(id, user);
+    return card as unknown as MembershipCardResponseDto;
   }
 }

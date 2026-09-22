@@ -30,6 +30,7 @@ import {
   DocumentRequestResponseDto,
   PaginatedDocumentRequestsResponseDto,
 } from '../dtos/document-request-response.dto';
+import { MembershipCardResponseDto } from '../../membership/dtos/membership-card-response.dto';
 
 /**
  * Public/Member Client Document Request Controller.
@@ -132,5 +133,30 @@ export class DocumentRequestController {
       user.id,
     );
     return request as unknown as DocumentRequestResponseDto;
+  }
+
+  @Get(':id/card')
+  @ApiOperation({
+    summary: 'Get the issued membership card for a submitted document request',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Document request MongoDB ObjectId',
+    example: '66fa3b5a9c1e7a001f3e9a11',
+  })
+  @ApiOkResponse({
+    type: MembershipCardResponseDto,
+    description: 'The issued membership card details.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Document request or membership card not found.',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  async getCard(
+    @Param('id') id: string,
+    @GetUser() user: AuthenticatedUser,
+  ): Promise<MembershipCardResponseDto> {
+    const card = await this.documentRequestService.getCard(id, user.id);
+    return card as unknown as MembershipCardResponseDto;
   }
 }

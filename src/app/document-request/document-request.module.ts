@@ -14,6 +14,7 @@ import { DocumentRequestService } from './services/document-request.service';
 import { DocumentRequestAdminService } from './services/document-request-admin.service';
 import { DocumentRequestController } from './controllers/document-request.controller';
 import { DocumentRequestAdminController } from './controllers/document-request-admin.controller';
+import { MembershipModule } from '../membership/membership.module';
 
 /**
  * Document Request Feature Module.
@@ -31,6 +32,7 @@ import { DocumentRequestAdminController } from './controllers/document-request-a
       { name: User.name, schema: UserSchema },
       { name: Payment.name, schema: PaymentSchema },
     ]),
+    MembershipModule,
   ],
   controllers: [DocumentRequestController, DocumentRequestAdminController],
   providers: [DocumentRequestService, DocumentRequestAdminService],

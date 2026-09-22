@@ -16,6 +16,14 @@ import {
   MembershipCard,
   MembershipCardSchema,
 } from './schemas/membership-card.schema';
+import {
+  DocumentRequest,
+  DocumentRequestSchema,
+} from '../document-request/document-request.schema';
+import {
+  RequestType,
+  RequestTypeSchema,
+} from '../request-type/request-type.schema';
 import { User, UserSchema } from '../user/user.schema';
 import {
   MemberDocument,
@@ -26,6 +34,7 @@ import { Payment, PaymentSchema } from '../payment/payment.schema';
 import { MembershipService } from './services/membership.service';
 import { MembershipAdminService } from './services/membership-admin.service';
 import { MembershipActivationService } from './services/membership-activation.service';
+import { MembershipCardService } from './services/membership-card.service';
 import { MembershipController } from './controllers/membership.controller';
 import { MembershipAdminController } from './controllers/membership-admin.controller';
 
@@ -49,6 +58,8 @@ import { MembershipAdminController } from './controllers/membership-admin.contro
       { name: MembershipTypeInfo.name, schema: MembershipTypeInfoSchema },
       { name: MembershipRequest.name, schema: MembershipRequestSchema },
       { name: MembershipCard.name, schema: MembershipCardSchema },
+      { name: DocumentRequest.name, schema: DocumentRequestSchema },
+      { name: RequestType.name, schema: RequestTypeSchema },
       { name: User.name, schema: UserSchema },
       { name: MemberDocument.name, schema: MemberDocumentSchema },
       { name: Province.name, schema: ProvinceSchema },
@@ -60,11 +71,13 @@ import { MembershipAdminController } from './controllers/membership-admin.contro
     MembershipService,
     MembershipAdminService,
     MembershipActivationService,
+    MembershipCardService,
   ],
   exports: [
     MembershipService,
     MembershipAdminService,
     MembershipActivationService,
+    MembershipCardService,
     MongooseModule,
   ],
 })

@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { DocumentRequestService } from './document-request.service';
+import { MembershipCardService } from '../../membership/services/membership-card.service';
 import {
   DocumentRequest,
   DocumentRequestStatus,
@@ -37,11 +38,17 @@ describe('DocumentRequestService', () => {
   let mockDocRequestModel: ReturnType<typeof buildDocumentRequestModelMock>;
   let mockRequestTypeModel: ReturnType<typeof buildRequestTypeModelMock>;
   let mockUserModel: ReturnType<typeof buildUserModelMock>;
+  let mockMembershipCardService: {
+    findByRequestId: jest.Mock;
+  };
 
   beforeEach(async () => {
     mockDocRequestModel = buildDocumentRequestModelMock();
     mockRequestTypeModel = buildRequestTypeModelMock();
     mockUserModel = buildUserModelMock();
+    mockMembershipCardService = {
+      findByRequestId: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -57,6 +64,10 @@ describe('DocumentRequestService', () => {
         {
           provide: getModelToken(User.name),
           useValue: mockUserModel,
+        },
+        {
+          provide: MembershipCardService,
+          useValue: mockMembershipCardService,
         },
       ],
     }).compile();
@@ -307,6 +318,40 @@ describe('DocumentRequestService', () => {
 
       await expect(
         service.findByIdAndUser(FIXED_REQUEST_ID, FIXED_USER_ID),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getCard', () => {
+    it('returns the issued card when user owns the request', async () => {
+      const request = buildDocumentRequest({ user: FIXED_USER_ID });
+      mockDocRequestModel.findOne.mockReturnValue(buildQueryChain(request));
+      const card = { _id: 'card-1' };
+      mockMembershipCardService.findByRequestId.mockResolvedValue(card);
+
+      const result = await service.getCard(FIXED_REQUEST_ID, FIXED_USER_ID);
+
+      expect(result).toBe(card);
+      expect(mockMembershipCardService.findByRequestId).toHaveBeenCalledWith(
+        FIXED_REQUEST_ID,
+      );
+    });
+
+    it('throws NotFoundException if request not found or not owned by user', async () => {
+      mockDocRequestModel.findOne.mockReturnValue(buildQueryChain(null));
+
+      await expect(
+        service.getCard(FIXED_REQUEST_ID, FIXED_USER_ID),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws NotFoundException if card is not found', async () => {
+      const request = buildDocumentRequest({ user: FIXED_USER_ID });
+      mockDocRequestModel.findOne.mockReturnValue(buildQueryChain(request));
+      mockMembershipCardService.findByRequestId.mockResolvedValue(null);
+
+      await expect(
+        service.getCard(FIXED_REQUEST_ID, FIXED_USER_ID),
       ).rejects.toThrow(NotFoundException);
     });
   });

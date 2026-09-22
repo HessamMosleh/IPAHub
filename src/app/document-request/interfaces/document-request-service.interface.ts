@@ -1,4 +1,5 @@
 import { DocumentRequest } from '../document-request.schema';
+import { MembershipCard } from '../../membership/schemas/membership-card.schema';
 import { CreateDocumentRequestDto } from '../dtos/create-document-request.dto';
 import { ListDocumentRequestsDto } from '../dtos/list-document-requests.dto';
 import { DocumentRequestOptionsResponseDto } from '../dtos/document-request-options-response.dto';
@@ -44,4 +45,9 @@ export interface IDocumentRequestService {
    * Retrieves a single document request owned by the authenticated member.
    */
   findByIdAndUser(id: string, userId: string): Promise<DocumentRequest>;
+
+  /**
+   * Retrieves the issued membership card for a document request owned by the authenticated member.
+   */
+  getCard(id: string, userId: string): Promise<MembershipCard>;
 }

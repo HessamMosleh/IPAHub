@@ -23,16 +23,20 @@ describe('ProvinceAdminService', () => {
   const OTHER_PROVINCE_ID = '66fa3b5a9c1e7a001f3e9a22';
 
   const provinceAdminUser: AuthenticatedUser = {
-    userId: 'user-prov-admin',
+    id: 'user-prov-admin',
     mobile: '09121111111',
     roles: [UserRole.PROVINCE_ADMIN],
     managedProvinces: [MINE_PROVINCE_ID],
+    province: MINE_PROVINCE_ID,
+    jti: 'jti-prov',
   };
 
   const superAdminUser: AuthenticatedUser = {
-    userId: 'user-super-admin',
+    id: 'user-super-admin',
     mobile: '09120000000',
     roles: [UserRole.SUPER_ADMIN],
+    province: OTHER_PROVINCE_ID,
+    jti: 'jti-super',
   };
 
   beforeEach(async () => {
