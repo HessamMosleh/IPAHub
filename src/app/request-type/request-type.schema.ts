@@ -70,6 +70,9 @@ export class RequestType extends Document {
 
   @Prop({ type: Date })
   createdAt: Date;
+
+  @Prop({ type: Date })
+  updatedAt?: Date;
 }
 
 export class RequestTypeProp {
@@ -82,6 +85,8 @@ export class RequestTypeProp {
     'order',
     'createdAt',
   ];
+
+  static client = [...this.general, 'prices'];
 
   static admin = [...this.general, 'status', 'prices'];
 }

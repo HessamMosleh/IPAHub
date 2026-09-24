@@ -66,6 +66,9 @@
   "DOCUMENT_REQUEST_ALREADY_PAID": "This document request has already been paid",
   "REQUEST_TYPE_NOT_FOUND": "Request type not found",
   "REQUEST_TYPE_INACTIVE": "This request type is not available",
+  "REQUEST_TYPE_SLUG_EXISTS": "Request type with this slug already exists",
+  "CANNOT_REORDER_REQUEST_TYPE": "Cannot reorder request type in the requested direction",
+  "CANNOT_DELETE_CARD_REQUEST_TYPE": "The membership card request type cannot be deleted",
   "DOCUMENT_FILE_REQUIRED": "A document file is required for fulfillment",
   "CARD_REQUEST_MANUAL_FULFILL_DISALLOWED": "Membership cards must be generated rather than fulfilled with an uploaded file",
   "CARD_PROFILE_INCOMPLETE": "Your profile is incomplete for a membership card request",
@@ -89,5 +92,7 @@
   "CANNOT_REORDER_GALLERY_IMAGE": "Cannot reorder gallery image in the requested direction",
   "PAGE_NOT_FOUND": "Page not found",
   "PAGE_KEY_EXISTS": "Page with this key already exists",
-  "INVALID_PAGE_KEY": "Invalid page key"
+  "INVALID_PAGE_KEY": "Invalid page key",
+  "SETTING_NOT_FOUND": "Setting not found",
+  "INVALID_SOCIAL_URL": "One or more social links are invalid"
 }

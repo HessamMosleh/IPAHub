@@ -66,6 +66,9 @@
   "DOCUMENT_REQUEST_ALREADY_PAID": "این درخواست مدرک قبلاً پرداخت شده است",
   "REQUEST_TYPE_NOT_FOUND": "نوع درخواست یافت نشد",
   "REQUEST_TYPE_INACTIVE": "این نوع درخواست فعال نمی‌باشد",
+  "REQUEST_TYPE_SLUG_EXISTS": "نوع درخواستی با این شناسه قبلاً ثبت شده است",
+  "CANNOT_REORDER_REQUEST_TYPE": "امکان جابجایی نوع درخواست در جهت درخواستی وجود ندارد",
+  "CANNOT_DELETE_CARD_REQUEST_TYPE": "امکان حذف نوع درخواست کارت عضویت وجود ندارد",
   "DOCUMENT_FILE_REQUIRED": "بارگذاری فایل مدرک برای صدور الزامی است",
   "CARD_REQUEST_MANUAL_FULFILL_DISALLOWED": "کارت عضویت باید به صورت سیستمی صادر شود و امکان بارگذاری دستی فایل وجود ندارد",
   "CARD_PROFILE_INCOMPLETE": "اطلاعات پروفایل شما برای درخواست کارت عضویت کامل نیست",
@@ -89,5 +92,7 @@
   "CANNOT_REORDER_GALLERY_IMAGE": "امکان جابجایی تصویر گالری در جهت درخواستی وجود ندارد",
   "PAGE_NOT_FOUND": "صفحه مورد نظر یافت نشد",
   "PAGE_KEY_EXISTS": "صفحه‌ای با این شناسه قبلاً ثبت شده است",
-  "INVALID_PAGE_KEY": "شناسه صفحه نامعتبر است"
+  "INVALID_PAGE_KEY": "شناسه صفحه نامعتبر است",
+  "SETTING_NOT_FOUND": "تنظیمات مورد نظر یافت نشد",
+  "INVALID_SOCIAL_URL": "یک یا چند پیوند شبکه اجتماعی نامعتبر است"
 }
