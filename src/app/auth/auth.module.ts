@@ -11,6 +11,7 @@ import { TokenStore } from './token-store';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserModule } from '../user/user.module';
+import { SmsSender } from './sms.stub';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { UserModule } from '../user/user.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, TokenStore, LocalStrategy, JwtStrategy],
+  providers: [AuthService, TokenStore, LocalStrategy, JwtStrategy, SmsSender],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

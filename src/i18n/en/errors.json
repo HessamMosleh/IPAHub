@@ -94,5 +94,15 @@
   "PAGE_KEY_EXISTS": "Page with this key already exists",
   "INVALID_PAGE_KEY": "Invalid page key",
   "SETTING_NOT_FOUND": "Setting not found",
-  "INVALID_SOCIAL_URL": "One or more social links are invalid"
+  "INVALID_SOCIAL_URL": "One or more social links are invalid",
+  "OTP_RATE_LIMITED": "Too many OTP requests. Please try again later",
+  "OTP_EXPIRED": "OTP has expired or was not requested",
+  "OTP_INVALID": "Invalid OTP code",
+  "OTP_TOO_MANY_ATTEMPTS": "Too many invalid OTP attempts",
+  "OTP_ADMIN_NOT_ALLOWED": "Administrators must sign in with password",
+  "FILE_NOT_FOUND": "File not found",
+  "FILE_REQUIRED": "A file upload is required",
+  "INVALID_STORAGE_KEY": "Invalid storage key",
+  "INVALID_DOCUMENT_KIND": "Invalid document kind",
+  "MEMBER_DOCUMENT_NOT_FOUND": "Member document not found"
 }

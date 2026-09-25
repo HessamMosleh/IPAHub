@@ -4,6 +4,7 @@ import { Strategy } from 'passport-local';
 import { User, UserProp } from '../../user/user.schema';
 import { UserService } from '../../user/user.service';
 import { translate } from '../../../common/utils/translate';
+import { toInternationalMobile } from '../../../common/utils/mobile.util';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -12,7 +13,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(mobile: string, password: string): Promise<User> {
-    const user = await this.userService.findOne({ mobile }, [
+    const international = toInternationalMobile(mobile);
+    const user = await this.userService.findOne({ mobile: international }, [
       ...UserProp.admin,
       '+password',
     ]);

@@ -28,6 +28,7 @@ import { EventModule } from './app/event/event.module';
 import { CooperationModule } from './app/cooperation/cooperation.module';
 import { FeedbackModule } from './app/feedback/feedback.module';
 import { PaymentModule } from './app/payment/payment.module';
+import { StorageModule } from './common/storage/storage.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { PaymentModule } from './app/payment/payment.module';
         MINIO_ACCESS_KEY: Joi.string().default('minioadmin'),
         MINIO_SECRET_KEY: Joi.string().default('minioadmin'),
         MINIO_BUCKET: Joi.string().default('pcahub'),
+        TEST_OTP_NUMBERS: Joi.string().allow('').optional(),
         FALLBACK_LANGUAGE: Joi.string()
           .valid(...Object.values(LanguageEnum))
           .default(LanguageEnum.FA),
@@ -80,6 +82,7 @@ import { PaymentModule } from './app/payment/payment.module';
       }),
       inject: [ConfigService],
     }),
+    StorageModule,
     UserModule,
     AuthModule,
     ProvinceModule,
