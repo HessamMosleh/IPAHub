@@ -19,8 +19,10 @@
   "MATCHES": "{property} با الگوی مجاز مطابقت ندارد",
   "IS_ARRAY": "{property} باید یک آرایه باشد",
   "ARRAY_NOT_EMPTY": "{property} نباید خالی باشد",
+  "ARRAY_MIN_SIZE": "{property} باید حداقل {constraints.0} عنصر داشته باشد",
   "ARRAY_UNIQUE": "تمام مقادیر {property} باید یکتا باشند",
   "IS_OBJECT": "{property} باید یک شیء باشد",
   "IS_NUMBER": "{property} باید یک عدد باشد",
+  "IS_BOOLEAN": "{property} باید یک مقدار بولی باشد",
   "MIN": "{property} نباید کمتر از {constraints.0} باشد"
 }

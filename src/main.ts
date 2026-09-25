@@ -29,8 +29,8 @@ async function bootstrap() {
   app.useGlobalFilters(new I18nValidationExceptionFilter());
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('PCA Hub API')
-    .setDescription('PCA Hub backend API documentation')
+    .setTitle('IPA Hub API')
+    .setDescription('IPA Hub backend API documentation')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -84,7 +84,7 @@ async function bootstrap() {
   const publicDocument = {
     ...filterDocument(fullDocument, false),
     info: {
-      title: 'PCA Hub API',
+      title: 'IPA Hub API',
       description:
         'Public/client API. Use a Bearer access token from /auth/login or /auth/refresh.',
       version: '1.0',
@@ -94,7 +94,7 @@ async function bootstrap() {
   const adminDocument = {
     ...filterDocument(fullDocument, true),
     info: {
-      title: 'PCA Hub Admin API',
+      title: 'IPA Hub Admin API',
       description:
         'Admin API. Requires an admin user and a Bearer access token.',
       version: '1.0',

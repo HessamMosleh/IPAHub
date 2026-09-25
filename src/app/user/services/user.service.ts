@@ -6,21 +6,21 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, QueryFilter, Types } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { User, UserProp, UserRole, UserStatus } from './user.schema';
-import { UpdateUserDto } from './dtos/update-user.dto';
-import { UpdateMemberProfileDto } from './dtos/update-member-profile.dto';
-import { UserResponseDto } from './dtos/user-response.dto';
-import { MemberDocumentResponseDto } from './dtos/member-document-response.dto';
+import { User, UserProp, UserRole, UserStatus } from '../user.schema';
+import { UpdateUserDto } from '../dtos/update-user.dto';
+import { UpdateMemberProfileDto } from '../dtos/update-member-profile.dto';
+import { UserResponseDto } from '../dtos/user-response.dto';
+import { MemberDocumentResponseDto } from '../dtos/member-document-response.dto';
 import {
   MemberDocument,
   MemberDocumentKind,
   MemberDocumentProp,
-} from './member-document.schema';
-import { Province } from '../../common/schemas/province.schema';
-import { MediaFile } from '../../common/schemas/media-file.schema';
-import { StorageService } from '../../common/storage/storage.service';
-import { translate } from '../../common/utils/translate';
-import { toInternationalMobile } from '../../common/utils/mobile.util';
+} from '../member-document.schema';
+import { Province } from '../../../common/schemas/province.schema';
+import { MediaFile } from '../../../common/schemas/media-file.schema';
+import { StorageService } from '../../../common/storage/storage.service';
+import { translate } from '../../../common/utils/translate';
+import { toInternationalMobile } from '../../../common/utils/mobile.util';
 
 const HASH_ROUNDS = 10;
 const DUPLICATE_KEY_ERROR = 11000;
@@ -160,7 +160,9 @@ export class UserService {
   async setPhoto(userId: string, photo: MediaFile): Promise<User> {
     const existing = await this.findOne({ _id: userId });
     if (existing.photo?.key) {
-      await this.storage.deleteObject(existing.photo.key).catch(() => undefined);
+      await this.storage
+        .deleteObject(existing.photo.key)
+        .catch(() => undefined);
     }
 
     const user = await this.userModel
@@ -192,7 +194,9 @@ export class UserService {
       .findOne({ user: new Types.ObjectId(userId), kind })
       .exec();
     if (!doc) {
-      throw new NotFoundException(translate('errors.MEMBER_DOCUMENT_NOT_FOUND'));
+      throw new NotFoundException(
+        translate('errors.MEMBER_DOCUMENT_NOT_FOUND'),
+      );
     }
     return doc;
   }
@@ -235,7 +239,9 @@ export class UserService {
 
   toResponse(user: User): UserResponseDto {
     const provinceId =
-      typeof user.province === 'object' && user.province && '_id' in user.province
+      typeof user.province === 'object' &&
+      user.province &&
+      '_id' in user.province
         ? (user.province as { _id: Types.ObjectId })._id.toString()
         : typeof user.province === 'string'
           ? user.province
@@ -258,6 +264,7 @@ export class UserService {
           : String(p),
       ),
       status: user.status,
+      active: user.active !== false,
       fatherName: user.fatherName,
       idNumber: user.idNumber,
       idIssuancePlace: user.idIssuancePlace,

@@ -46,6 +46,11 @@ export class UserResponseDto {
   @ApiProperty({ enum: UserStatus })
   status: UserStatus;
 
+  @ApiPropertyOptional({
+    description: 'Whether an administrator account may sign in',
+  })
+  active?: boolean;
+
   @ApiPropertyOptional()
   fatherName?: string;
 
@@ -93,4 +98,29 @@ export class UserResponseDto {
 
   @ApiProperty()
   createdAt: Date;
+}
+
+export class PaginatedUsersResponseDto {
+  @ApiProperty({ type: [UserResponseDto] })
+  data: UserResponseDto[];
+
+  @ApiProperty({ example: 10 })
+  total: number;
+
+  @ApiProperty({ example: 1 })
+  page: number;
+
+  @ApiProperty({ example: 20 })
+  limit: number;
+
+  @ApiProperty({ example: 1 })
+  totalPages: number;
+}
+
+export class UserPendingCountResponseDto {
+  @ApiProperty({
+    example: 3,
+    description: 'Users with status registering awaiting admin review',
+  })
+  count: number;
 }

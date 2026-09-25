@@ -1,10 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
-import { User, UserProp } from '../../user/user.schema';
-import { UserService } from '../../user/user.service';
+import { User, UserProp, UserRole } from '../../user/user.schema';
+import { UserService } from '../../user/services/user.service';
 import { translate } from '../../../common/utils/translate';
 import { toInternationalMobile } from '../../../common/utils/mobile.util';
+
+const ADMIN_ROLES = new Set([
+  UserRole.ADMIN,
+  UserRole.SUPER_ADMIN,
+  UserRole.PROVINCE_ADMIN,
+]);
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -19,6 +25,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       '+password',
     ]);
     if (!user) {
+      throw new UnauthorizedException(translate('errors.INVALID_CREDENTIALS'));
+    }
+
+    const isAdmin = (user.roles ?? []).some((r) => ADMIN_ROLES.has(r));
+    if (isAdmin && user.active === false) {
       throw new UnauthorizedException(translate('errors.INVALID_CREDENTIALS'));
     }
 

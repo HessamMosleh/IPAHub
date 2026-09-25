@@ -19,8 +19,10 @@
   "MATCHES": "{property} must match {constraints.0} regular expression",
   "IS_ARRAY": "{property} must be an array",
   "ARRAY_NOT_EMPTY": "{property} should not be empty",
+  "ARRAY_MIN_SIZE": "{property} must contain at least {constraints.0} elements",
   "ARRAY_UNIQUE": "All {property}'s elements must be unique",
   "IS_OBJECT": "{property} must be an object",
   "IS_NUMBER": "{property} must be a number",
+  "IS_BOOLEAN": "{property} must be a boolean value",
   "MIN": "{property} must not be less than {constraints.0}"
 }

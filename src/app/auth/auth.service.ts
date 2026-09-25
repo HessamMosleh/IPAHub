@@ -12,7 +12,7 @@ import { Model } from 'mongoose';
 import { randomInt, randomUUID } from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import { User, UserRole } from '../user/user.schema';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services/user.service';
 import { TokenStore } from './token-store';
 import { JwtAccessPayload, JwtRefreshPayload } from './types';
 import { translate } from '../../common/utils/translate';

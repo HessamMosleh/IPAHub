@@ -23,15 +23,15 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { GetUser } from '../auth/decorators/get-user.decorator';
-import type { AuthenticatedUser } from '../auth/types';
-import { UserService } from './user.service';
-import { UpdateMemberProfileDto } from './dtos/update-member-profile.dto';
-import { UserResponseDto } from './dtos/user-response.dto';
-import { MemberDocumentKind } from './member-document.schema';
-import { StorageService } from '../../common/storage/storage.service';
-import { translate } from '../../common/utils/translate';
-import { MemberDocumentResponseDto } from './dtos/member-document-response.dto';
+import { GetUser } from '../../auth/decorators/get-user.decorator';
+import type { AuthenticatedUser } from '../../auth/types';
+import { UpdateMemberProfileDto } from '../dtos/update-member-profile.dto';
+import { UserResponseDto } from '../dtos/user-response.dto';
+import { MemberDocumentKind } from '../member-document.schema';
+import { StorageService } from '../../../common/storage/storage.service';
+import { translate } from '../../../common/utils/translate';
+import { MemberDocumentResponseDto } from '../dtos/member-document-response.dto';
+import { UserService } from '../services/user.service';
 
 @ApiTags('User')
 @ApiBearerAuth('access-token')

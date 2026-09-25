@@ -104,5 +104,11 @@
   "FILE_REQUIRED": "A file upload is required",
   "INVALID_STORAGE_KEY": "Invalid storage key",
   "INVALID_DOCUMENT_KIND": "Invalid document kind",
-  "MEMBER_DOCUMENT_NOT_FOUND": "Member document not found"
+  "MEMBER_DOCUMENT_NOT_FOUND": "Member document not found",
+  "MEMBER_HAS_OUTSTANDING_BILL": "This member has a membership request awaiting payment; settle or reject it first",
+  "CANNOT_REJECT_ACTIVE_MEMBER": "An approved member cannot be rejected from the members screen",
+  "CANNOT_APPROVE_DELETED_USER": "A deleted user cannot be approved",
+  "ADMIN_NOT_FOUND": "Administrator account not found",
+  "CANNOT_MODIFY_SUPER_ADMIN": "Super administrator accounts cannot be modified here",
+  "MANAGED_PROVINCES_REQUIRED": "At least one managed province is required for a province administrator"
 }

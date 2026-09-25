@@ -2,8 +2,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, ExtractJwt } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from '../../user/user.service';
-import { UserProp } from '../../user/user.schema';
+import { UserService } from '../../user/services/user.service';
+import { UserProp, UserRole } from '../../user/user.schema';
 import { TokenStore } from '../token-store';
 import { JwtAccessPayload } from '../types';
 import { translate } from '../../../common/utils/translate';
@@ -36,6 +36,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       { _id: payload.sub },
       UserProp.admin,
     );
+
+    const isAdmin = (user.roles ?? []).some(
+      (r) =>
+        r === UserRole.ADMIN ||
+        r === UserRole.SUPER_ADMIN ||
+        r === UserRole.PROVINCE_ADMIN,
+    );
+    if (isAdmin && user.active === false) {
+      throw new UnauthorizedException(translate('errors.INVALID_CREDENTIALS'));
+    }
 
     return {
       id: user._id.toString(),

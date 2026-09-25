@@ -104,5 +104,11 @@
   "FILE_REQUIRED": "آپلود فایل الزامی است",
   "INVALID_STORAGE_KEY": "کلید ذخیره‌سازی نامعتبر است",
   "INVALID_DOCUMENT_KIND": "نوع مدرک نامعتبر است",
-  "MEMBER_DOCUMENT_NOT_FOUND": "مدرک عضو یافت نشد"
+  "MEMBER_DOCUMENT_NOT_FOUND": "مدرک عضو یافت نشد",
+  "MEMBER_HAS_OUTSTANDING_BILL": "این عضو درخواست عضویت در انتظار پرداخت دارد؛ ابتدا آن را تسویه یا رد کنید",
+  "CANNOT_REJECT_ACTIVE_MEMBER": "عضو تأییدشده را نمی‌توان از صفحه اعضا رد کرد",
+  "CANNOT_APPROVE_DELETED_USER": "کاربر حذف‌شده را نمی‌توان تأیید کرد",
+  "ADMIN_NOT_FOUND": "حساب مدیر یافت نشد",
+  "CANNOT_MODIFY_SUPER_ADMIN": "حساب‌های مدیرکل از این مسیر قابل تغییر نیستند",
+  "MANAGED_PROVINCES_REQUIRED": "برای مدیر استان حداقل یک استان مدیریتی الزامی است"
 }

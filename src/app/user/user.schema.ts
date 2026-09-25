@@ -192,6 +192,15 @@ export class User extends Document {
   @Prop({ type: String, enum: UserStatus, default: UserStatus.REGISTERING })
   status: UserStatus;
 
+  /**
+   * Login gate for administrator accounts. Members ignore this (OTP login
+   * only checks `status !== DELETED`); province/global admins with
+   * `active: false` cannot sign in with password even though the row remains
+   * listed in the admin directory.
+   */
+  @Prop({ type: Boolean, default: true })
+  active: boolean;
+
   @Prop({ type: Date })
   createdAt: Date;
 }
@@ -226,6 +235,7 @@ export class UserProp {
   static admin = [
     ...this.general,
     'status',
+    'active',
     'managedProvinces',
     'entranceFeeSettledAt',
     'rejectionReason',
