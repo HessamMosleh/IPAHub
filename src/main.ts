@@ -12,8 +12,14 @@ async function bootstrap() {
       : ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
-  // Apply security middleware
-  app.use(helmet());
+  // Public /storage/file keys are embedded as <img src> from the Next.js
+  // frontend (different origin). Helmet's default CORP `same-origin` blocks
+  // those loads in the browser — allow cross-origin embedding for media.
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
   app.useGlobalPipes(
     new I18nValidationPipe({
