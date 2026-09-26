@@ -23,6 +23,10 @@ import { ActiveStatus } from '../../../common/enums/active-status.enum';
 import { PaymentStatus } from '../../../common/enums/payment-status.enum';
 import { translate } from '../../../common/utils/translate';
 import { toMediaFile } from '../../../common/utils/media-file.util';
+import {
+  MediaService,
+  mediaKeys,
+} from '../../../common/storage/services/media.service';
 import { AuthenticatedUser } from '../../auth/types';
 import {
   AdminEventItem,
@@ -67,6 +71,7 @@ export class EventAdminService implements IEventAdminService {
     private readonly userModel: Model<User>,
     @InjectModel(Payment.name)
     private readonly paymentModel: Model<Payment>,
+    private readonly media: MediaService,
   ) {}
 
   /**
@@ -231,19 +236,23 @@ export class EventAdminService implements IEventAdminService {
       status = dto.published ? ActiveStatus.ACTIVE : ActiveStatus.DISABLED;
     }
 
-    const created = await this.eventModel.create({
-      type: dto.type,
-      title: dto.title,
-      description: dto.description,
-      startsAt: new Date(dto.startsAt),
-      location: dto.location,
-      capacity: dto.capacity ?? undefined,
-      fee: dto.fee ?? 0,
-      poster: dto.poster ? toMediaFile(dto.poster) : undefined,
-      province: provinceId ? new Types.ObjectId(provinceId) : undefined,
-      status,
-      createdAt: new Date(),
-    });
+    const poster = dto.poster ? toMediaFile(dto.poster) : undefined;
+
+    const created = await this.media.commit({ next: mediaKeys(poster) }, () =>
+      this.eventModel.create({
+        type: dto.type,
+        title: dto.title,
+        description: dto.description,
+        startsAt: new Date(dto.startsAt),
+        location: dto.location,
+        capacity: dto.capacity ?? undefined,
+        fee: dto.fee ?? 0,
+        poster,
+        province: provinceId ? new Types.ObjectId(provinceId) : undefined,
+        status,
+        createdAt: new Date(),
+      }),
+    );
 
     return (await this.eventModel
       .findById(created._id)
@@ -266,6 +275,8 @@ export class EventAdminService implements IEventAdminService {
     }
 
     this.assertProvinceScope(event.province, admin);
+
+    const previousMedia = mediaKeys(event.poster);
 
     if (dto.province !== undefined) {
       const isSuper = admin?.roles?.some(
@@ -305,7 +316,10 @@ export class EventAdminService implements IEventAdminService {
       event.status = dto.status;
     }
 
-    await event.save();
+    await this.media.commit(
+      { next: mediaKeys(event.poster), previous: previousMedia },
+      () => event.save(),
+    );
 
     return (await this.eventModel
       .findById(event._id)
@@ -353,10 +367,19 @@ export class EventAdminService implements IEventAdminService {
 
     this.assertProvinceScope(event.province, admin);
 
+    const registrations = await this.eventRegistrationModel
+      .find({ event: event._id })
+      .select('certificate')
+      .exec();
+
     await Promise.all([
       this.eventModel.findByIdAndDelete(id).exec(),
       this.eventRegistrationModel.deleteMany({ event: event._id }).exec(),
     ]);
+
+    await this.media.release(
+      mediaKeys(event.poster, ...registrations.map((r) => r.certificate)),
+    );
 
     return { success: true };
   }
@@ -467,12 +490,16 @@ export class EventAdminService implements IEventAdminService {
 
     this.assertProvinceScope(registration.event?.province, admin);
 
+    const previousMedia = mediaKeys(registration.certificate);
     registration.attended = dto.attended;
     if (dto.certificate) {
       registration.certificate = toMediaFile(dto.certificate);
     }
 
-    await registration.save();
+    await this.media.commit(
+      { next: mediaKeys(registration.certificate), previous: previousMedia },
+      () => registration.save(),
+    );
 
     return (await this.eventRegistrationModel
       .findById(registration._id)
@@ -586,6 +613,7 @@ export class EventAdminService implements IEventAdminService {
     this.assertProvinceScope(registration.event?.province, admin);
 
     await this.eventRegistrationModel.findByIdAndDelete(registrationId).exec();
+    await this.media.release(mediaKeys(registration.certificate));
     return { success: true };
   }
 

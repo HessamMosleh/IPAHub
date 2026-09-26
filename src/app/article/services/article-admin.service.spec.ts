@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MediaService } from '../../../common/storage/services/media.service';
+import { buildMediaServiceMock } from '../../../common/storage/services/__test-helpers__/media-service.mock';
 import { getModelToken } from '@nestjs/mongoose';
 import {
   BadRequestException,
@@ -34,6 +36,7 @@ describe('ArticleAdminService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ArticleAdminService,
+        { provide: MediaService, useValue: buildMediaServiceMock() },
         {
           provide: getModelToken(Article.name),
           useValue: mockArticleModel,

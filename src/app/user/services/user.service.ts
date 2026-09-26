@@ -18,7 +18,7 @@ import {
 } from '../member-document.schema';
 import { Province } from '../../../common/schemas/province.schema';
 import { MediaFile } from '../../../common/schemas/media-file.schema';
-import { StorageService } from '../../../common/storage/storage.service';
+import { StorageService } from '../../../common/storage/services/storage.service';
 import { translate } from '../../../common/utils/translate';
 import { toInternationalMobile } from '../../../common/utils/mobile.util';
 

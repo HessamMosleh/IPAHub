@@ -26,6 +26,7 @@ import {
 import { PaymentStatus } from '../../../common/enums/payment-status.enum';
 import { translate } from '../../../common/utils/translate';
 import { toMediaFile } from '../../../common/utils/media-file.util';
+import { MediaService, mediaKeys } from '../../../common/storage/services/media.service';
 import { AuthenticatedUser } from '../../auth/types';
 import { idToString } from '../utils/document-request-pricing.util';
 import {
@@ -57,6 +58,7 @@ export class DocumentRequestAdminService implements IDocumentRequestAdminService
     @InjectModel(Payment.name)
     private readonly paymentModel: Model<Payment>,
     private readonly membershipCardService: MembershipCardService,
+    private readonly media: MediaService,
   ) {}
 
   /**
@@ -344,6 +346,7 @@ export class DocumentRequestAdminService implements IDocumentRequestAdminService
       );
     }
 
+    const previousMedia = mediaKeys(request.issuedFile);
     if (requestType?.producesDocument) {
       if (!dto?.file?.key?.trim()) {
         throw new BadRequestException(
@@ -354,7 +357,10 @@ export class DocumentRequestAdminService implements IDocumentRequestAdminService
     }
 
     request.status = DocumentRequestStatus.COMPLETED;
-    await request.save();
+    await this.media.commit(
+      { next: mediaKeys(request.issuedFile), previous: previousMedia },
+      () => request.save(),
+    );
     return request;
   }
 
@@ -453,6 +459,7 @@ export class DocumentRequestAdminService implements IDocumentRequestAdminService
     this.assertProvinceScope(request.user?.province, admin);
 
     await this.documentRequestModel.findByIdAndDelete(id).exec();
+    await this.media.release(mediaKeys(request.issuedFile));
     return { success: true };
   }
 

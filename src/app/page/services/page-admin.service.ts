@@ -9,6 +9,7 @@ import { isValidObjectId, Model, QueryFilter } from 'mongoose';
 import { Page, PageKey, PageProp } from '../page.schema';
 import { translate } from '../../../common/utils/translate';
 import { sanitizeHtml } from '../../../common/utils/sanitize-html.util';
+import { MediaService, mediaKeys } from '../../../common/storage/services/media.service';
 import { AdminListPagesDto } from '../dtos/admin-list-pages.dto';
 import { CreatePageDto } from '../dtos/create-page.dto';
 import { UpdatePageDto } from '../dtos/update-page.dto';
@@ -30,6 +31,7 @@ export class PageAdminService implements IPageAdminService {
   constructor(
     @InjectModel(Page.name)
     private readonly pageModel: Model<Page>,
+    private readonly media: MediaService,
   ) {}
 
   /**
@@ -155,6 +157,7 @@ export class PageAdminService implements IPageAdminService {
       : (existing?.body ?? { en: '' });
 
     if (existing) {
+      const previousMedia = mediaKeys(existing.image);
       existing.title = title;
       existing.body = body;
 
@@ -164,15 +167,21 @@ export class PageAdminService implements IPageAdminService {
         existing.image = dto.image;
       }
 
-      return existing.save();
+      return this.media.commit(
+        { next: mediaKeys(existing.image), previous: previousMedia },
+        () => existing.save(),
+      );
     }
 
-    return this.pageModel.create({
-      key: normalizedKey,
-      title,
-      body,
-      image: dto.removeImage ? undefined : dto.image,
-    });
+    const image = dto.removeImage ? undefined : dto.image;
+    return this.media.commit({ next: mediaKeys(image) }, () =>
+      this.pageModel.create({
+        key: normalizedKey,
+        title,
+        body,
+        image,
+      }),
+    );
   }
 
   /**
@@ -201,12 +210,14 @@ export class PageAdminService implements IPageAdminService {
       fa: dto.body.fa ? sanitizeHtml(dto.body.fa) : undefined,
     };
 
-    return this.pageModel.create({
-      key: normalizedKey,
-      title,
-      body,
-      image: dto.image,
-    });
+    return this.media.commit({ next: mediaKeys(dto.image) }, () =>
+      this.pageModel.create({
+        key: normalizedKey,
+        title,
+        body,
+        image: dto.image,
+      }),
+    );
   }
 
   /**
@@ -219,6 +230,8 @@ export class PageAdminService implements IPageAdminService {
     if (!page) {
       throw new NotFoundException(translate('errors.PAGE_NOT_FOUND'));
     }
+
+    const previousMedia = mediaKeys(page.image);
 
     if (dto.title) {
       page.title = {
@@ -246,7 +259,10 @@ export class PageAdminService implements IPageAdminService {
       page.image = dto.image;
     }
 
-    return page.save();
+    return this.media.commit(
+      { next: mediaKeys(page.image), previous: previousMedia },
+      () => page.save(),
+    );
   }
 
   /**
@@ -298,6 +314,7 @@ export class PageAdminService implements IPageAdminService {
     }
 
     await this.pageModel.findByIdAndDelete(page._id).exec();
+    await this.media.release(mediaKeys(page.image));
     return { success: true };
   }
 }

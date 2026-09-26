@@ -12,6 +12,7 @@ import { UserRole } from '../../user/user.schema';
 import { translate } from '../../../common/utils/translate';
 import { sanitizeHtml } from '../../../common/utils/sanitize-html.util';
 import { toMediaFile } from '../../../common/utils/media-file.util';
+import { MediaService, mediaKeys } from '../../../common/storage/services/media.service';
 import { AuthenticatedUser } from '../../auth/types';
 import { AdminListNewsDto } from '../dtos/admin-list-news.dto';
 import { CreateNewsDto } from '../dtos/create-news.dto';
@@ -34,6 +35,7 @@ export class NewsAdminService implements INewsAdminService {
     private readonly newsModel: Model<News>,
     @InjectModel(Province.name)
     private readonly provinceModel: Model<Province>,
+    private readonly media: MediaService,
   ) {}
 
   /**
@@ -252,22 +254,24 @@ export class NewsAdminService implements INewsAdminService {
 
     const image = toMediaFile(dto.image);
 
-    const created = await this.newsModel.create({
-      title,
-      subTitle,
-      content,
-      summery,
-      image,
-      category,
-      province: provinceId ? new Types.ObjectId(provinceId) : undefined,
-      status,
-      author:
-        user?.id && isValidObjectId(user.id)
-          ? new Types.ObjectId(user.id)
-          : undefined,
-      byline,
-      publishedAt,
-    });
+    const created = await this.media.commit({ next: mediaKeys(image) }, () =>
+      this.newsModel.create({
+        title,
+        subTitle,
+        content,
+        summery,
+        image,
+        category,
+        province: provinceId ? new Types.ObjectId(provinceId) : undefined,
+        status,
+        author:
+          user?.id && isValidObjectId(user.id)
+            ? new Types.ObjectId(user.id)
+            : undefined,
+        byline,
+        publishedAt,
+      }),
+    );
 
     return this.findById(created._id.toString(), user);
   }
@@ -292,6 +296,7 @@ export class NewsAdminService implements INewsAdminService {
 
     this.assertNewsScope(news, user);
 
+    const previousMedia = mediaKeys(news.image);
     const isSuper = this.isSuperAdmin(user);
 
     // Determine target category
@@ -419,7 +424,10 @@ export class NewsAdminService implements INewsAdminService {
       news.publishedAt = dto.publishedAt;
     }
 
-    await news.save();
+    await this.media.commit(
+      { next: mediaKeys(news.image), previous: previousMedia },
+      () => news.save(),
+    );
 
     return this.findById(id, user);
   }

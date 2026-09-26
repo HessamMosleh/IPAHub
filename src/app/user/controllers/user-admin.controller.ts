@@ -30,7 +30,7 @@ import { Roles } from '../../../common/decorators/roles.decorator';
 import { UserRole } from '../user.schema';
 import { GetUser } from '../../auth/decorators/get-user.decorator';
 import type { AuthenticatedUser } from '../../auth/types';
-import { StorageService } from '../../../common/storage/storage.service';
+import { StorageService } from '../../../common/storage/services/storage.service';
 import { translate } from '../../../common/utils/translate';
 import { UserAdminService } from '../services/user-admin.service';
 import { UserService } from '../services/user.service';

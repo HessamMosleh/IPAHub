@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MediaService } from '../../../common/storage/services/media.service';
+import { buildMediaServiceMock } from '../../../common/storage/services/__test-helpers__/media-service.mock';
 import { getModelToken } from '@nestjs/mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { GalleryAdminService } from './gallery-admin.service';
@@ -19,13 +21,16 @@ import {
 describe('GalleryAdminService', () => {
   let service: GalleryAdminService;
   let mockModel: ReturnType<typeof buildGalleryImageModelMock>;
+  let media: ReturnType<typeof buildMediaServiceMock>;
 
   beforeEach(async () => {
     mockModel = buildGalleryImageModelMock();
+    media = buildMediaServiceMock();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GalleryAdminService,
+        { provide: MediaService, useValue: media },
         {
           provide: getModelToken(GalleryImage.name),
           useValue: mockModel,
@@ -208,6 +213,22 @@ describe('GalleryAdminService', () => {
       expect(existing.order).toBe(3);
       expect(existing.status).toBe(ActiveStatus.DISABLED);
       expect(existing.save).toHaveBeenCalled();
+      expect(media.commit).toHaveBeenCalledWith(
+        { next: ['new-key.jpg'], previous: ['seed/banner-association.svg'] },
+        expect.any(Function),
+      );
+    });
+
+    it('claims the new image through the media ledger on create', async () => {
+      const dto = buildCreateGalleryImageDto({ order: 1 });
+      mockModel.create.mockResolvedValue(buildGalleryImage());
+
+      await service.create(dto);
+
+      expect(media.commit).toHaveBeenCalledWith(
+        { next: [dto.image.key] },
+        expect.any(Function),
+      );
     });
 
     it('clears caption when null or empty strings passed', async () => {
@@ -477,6 +498,7 @@ describe('GalleryAdminService', () => {
       expect(mockModel.findByIdAndDelete).toHaveBeenCalledWith(
         FIXED_GALLERY_ID,
       );
+      expect(media.release).toHaveBeenCalledWith([item.image.key]);
       expect(result).toEqual({ success: true });
     });
 

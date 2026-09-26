@@ -19,6 +19,10 @@ import {
   normalizeWhatsapp,
 } from '../../../common/utils/social-url.util';
 import { ISettingAdminService } from '../interfaces/setting-admin-service.interface';
+import {
+  MediaService,
+  mediaKeys,
+} from '../../../common/storage/services/media.service';
 
 /** Base sequence number for membership numbers if none exists yet. */
 const MEMBERSHIP_BASE_SEQ = 1000;
@@ -36,6 +40,7 @@ export class SettingAdminService implements ISettingAdminService {
     private readonly siteSettingModel: Model<SiteSetting>,
     @InjectModel(MemberSetting.name)
     private readonly memberSettingModel: Model<MemberSetting>,
+    private readonly media: MediaService,
   ) {}
 
   /**
@@ -152,15 +157,27 @@ export class SettingAdminService implements ISettingAdminService {
       updates[SiteSettingKey.WHATSAPP] = normalizeWhatsapp(dto.whatsapp);
     }
 
-    await Promise.all(
-      Object.entries(updates).map(([key, value]) =>
-        this.siteSettingModel
-          .findOneAndUpdate(
-            { key },
-            { $set: { key, value } },
-            { upsert: true, new: true },
-          )
-          .exec(),
+    const logoChange =
+      dto.logoKey !== undefined
+        ? {
+            next: mediaKeys(updates[SiteSettingKey.LOGO_KEY]),
+            previous: mediaKeys(
+              await this.findSiteSettingValue(SiteSettingKey.LOGO_KEY),
+            ),
+          }
+        : { next: [] };
+
+    await this.media.commit(logoChange, () =>
+      Promise.all(
+        Object.entries(updates).map(([key, value]) =>
+          this.siteSettingModel
+            .findOneAndUpdate(
+              { key },
+              { $set: { key, value } },
+              { upsert: true, new: true },
+            )
+            .exec(),
+        ),
       ),
     );
 
@@ -198,15 +215,30 @@ export class SettingAdminService implements ISettingAdminService {
       }
     }
 
-    await this.siteSettingModel
-      .findOneAndUpdate(
-        { key },
-        { $set: { key, value } },
-        { upsert: true, new: true },
-      )
-      .exec();
+    const mediaChange =
+      key === (SiteSettingKey.LOGO_KEY as string)
+        ? {
+            next: mediaKeys(value),
+            previous: mediaKeys(await this.findSiteSettingValue(key)),
+          }
+        : { next: [] };
+
+    await this.media.commit(mediaChange, () =>
+      this.siteSettingModel
+        .findOneAndUpdate(
+          { key },
+          { $set: { key, value } },
+          { upsert: true, new: true },
+        )
+        .exec(),
+    );
 
     return { key, value };
+  }
+
+  private async findSiteSettingValue(key: string): Promise<string | undefined> {
+    const row = await this.siteSettingModel.findOne({ key }).exec();
+    return row?.value;
   }
 
   /**

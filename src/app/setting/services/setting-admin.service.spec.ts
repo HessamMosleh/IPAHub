@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MediaService } from '../../../common/storage/services/media.service';
+import { buildMediaServiceMock } from '../../../common/storage/services/__test-helpers__/media-service.mock';
 import { getModelToken } from '@nestjs/mongoose';
 import { BadRequestException } from '@nestjs/common';
 import { SettingAdminService } from './setting-admin.service';
@@ -23,6 +25,7 @@ describe('SettingAdminService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SettingAdminService,
+        { provide: MediaService, useValue: buildMediaServiceMock() },
         {
           provide: getModelToken(SiteSetting.name),
           useValue: siteSettingModel,
@@ -191,6 +194,7 @@ describe('SettingAdminService', () => {
     });
 
     it('updates associationName and logoKey', async () => {
+      siteSettingModel.findOne.mockReturnValue(buildQueryChain(null));
       siteSettingModel.findOneAndUpdate.mockReturnValue(buildQueryChain({}));
       siteSettingModel.find.mockReturnValue(
         buildQueryChain([

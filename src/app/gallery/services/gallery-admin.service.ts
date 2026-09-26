@@ -10,6 +10,7 @@ import { LocalizedText } from '../../../common/schemas/localized-text.schema';
 import { ActiveStatus } from '../../../common/enums/active-status.enum';
 import { translate } from '../../../common/utils/translate';
 import { toMediaFile } from '../../../common/utils/media-file.util';
+import { MediaService, mediaKeys } from '../../../common/storage/services/media.service';
 import { AdminListGalleryImagesDto } from '../dtos/admin-list-gallery-images.dto';
 import { CreateGalleryImageDto } from '../dtos/create-gallery-image.dto';
 import { UpdateGalleryImageDto } from '../dtos/update-gallery-image.dto';
@@ -34,6 +35,7 @@ export class GalleryAdminService implements IGalleryAdminService {
   constructor(
     @InjectModel(GalleryImage.name)
     private readonly galleryImageModel: Model<GalleryImage>,
+    private readonly media: MediaService,
   ) {}
 
   /**
@@ -128,12 +130,14 @@ export class GalleryAdminService implements IGalleryAdminService {
       }
     }
 
-    return this.galleryImageModel.create({
-      image,
-      caption,
-      order,
-      status: dto.status ?? ActiveStatus.ACTIVE,
-    });
+    return this.media.commit({ next: mediaKeys(image) }, () =>
+      this.galleryImageModel.create({
+        image,
+        caption,
+        order,
+        status: dto.status ?? ActiveStatus.ACTIVE,
+      }),
+    );
   }
 
   /**
@@ -148,6 +152,8 @@ export class GalleryAdminService implements IGalleryAdminService {
     if (!imageDoc) {
       throw new NotFoundException(translate('errors.GALLERY_IMAGE_NOT_FOUND'));
     }
+
+    const previousMedia = mediaKeys(imageDoc.image);
 
     if (dto.image) {
       imageDoc.image = toMediaFile(dto.image);
@@ -175,7 +181,10 @@ export class GalleryAdminService implements IGalleryAdminService {
       imageDoc.status = dto.status;
     }
 
-    return imageDoc.save();
+    return this.media.commit(
+      { next: mediaKeys(imageDoc.image), previous: previousMedia },
+      () => imageDoc.save(),
+    );
   }
 
   /**
@@ -269,6 +278,8 @@ export class GalleryAdminService implements IGalleryAdminService {
     if (!res) {
       throw new NotFoundException(translate('errors.GALLERY_IMAGE_NOT_FOUND'));
     }
+
+    await this.media.release(mediaKeys(res.image));
 
     return { success: true };
   }

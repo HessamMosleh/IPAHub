@@ -28,7 +28,11 @@ import type { AuthenticatedUser } from '../../auth/types';
 import { UpdateMemberProfileDto } from '../dtos/update-member-profile.dto';
 import { UserResponseDto } from '../dtos/user-response.dto';
 import { MemberDocumentKind } from '../member-document.schema';
-import { StorageService } from '../../../common/storage/storage.service';
+import { StorageService } from '../../../common/storage/services/storage.service';
+import {
+  isAllowedDocumentMime,
+  isAllowedPhotoMime,
+} from '../../../common/storage/upload-limits';
 import { translate } from '../../../common/utils/translate';
 import { MemberDocumentResponseDto } from '../dtos/member-document-response.dto';
 import { UserService } from '../services/user.service';
@@ -85,8 +89,8 @@ export class UserController {
     if (!file?.buffer?.length) {
       throw new BadRequestException(translate('errors.FILE_REQUIRED'));
     }
-    if (!file.mimetype?.startsWith('image/')) {
-      throw new BadRequestException(translate('errors.FILE_REQUIRED'));
+    if (!isAllowedPhotoMime(file.mimetype)) {
+      throw new BadRequestException(translate('errors.UNSUPPORTED_FILE_TYPE'));
     }
     const media = await this.storage.putObject({
       buffer: file.buffer,
@@ -135,9 +139,12 @@ export class UserController {
     if (!file?.buffer?.length) {
       throw new BadRequestException(translate('errors.FILE_REQUIRED'));
     }
+    if (!isAllowedDocumentMime(file.mimetype)) {
+      throw new BadRequestException(translate('errors.UNSUPPORTED_FILE_TYPE'));
+    }
     const media = await this.storage.putObject({
       buffer: file.buffer,
-      mimeType: file.mimetype || 'application/octet-stream',
+      mimeType: file.mimetype,
       originalName: file.originalname,
       prefix: 'documents',
       visibility: 'private',

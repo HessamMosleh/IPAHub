@@ -17,6 +17,7 @@ import { UserRole } from '../../user/user.schema';
 import { translate } from '../../../common/utils/translate';
 import { sanitizeHtml } from '../../../common/utils/sanitize-html.util';
 import { toMediaFile } from '../../../common/utils/media-file.util';
+import { MediaService, mediaKeys } from '../../../common/storage/services/media.service';
 import { AuthenticatedUser } from '../../auth/types';
 import { AdminListArticleDto } from '../dtos/admin-list-article.dto';
 import { CreateArticleDto } from '../dtos/create-article.dto';
@@ -39,6 +40,7 @@ export class ArticleAdminService implements IArticleAdminService {
     private readonly articleModel: Model<Article>,
     @InjectModel(Province.name)
     private readonly provinceModel: Model<Province>,
+    private readonly media: MediaService,
   ) {}
 
   /**
@@ -260,22 +262,24 @@ export class ArticleAdminService implements IArticleAdminService {
 
     const image = toMediaFile(dto.image);
 
-    const created = await this.articleModel.create({
-      title,
-      subTitle,
-      content,
-      summery,
-      image,
-      category,
-      province: provinceId ? new Types.ObjectId(provinceId) : undefined,
-      status,
-      author:
-        user?.id && isValidObjectId(user.id)
-          ? new Types.ObjectId(user.id)
-          : undefined,
-      byline,
-      publishedAt,
-    });
+    const created = await this.media.commit({ next: mediaKeys(image) }, () =>
+      this.articleModel.create({
+        title,
+        subTitle,
+        content,
+        summery,
+        image,
+        category,
+        province: provinceId ? new Types.ObjectId(provinceId) : undefined,
+        status,
+        author:
+          user?.id && isValidObjectId(user.id)
+            ? new Types.ObjectId(user.id)
+            : undefined,
+        byline,
+        publishedAt,
+      }),
+    );
 
     return this.findById(created._id.toString(), user);
   }
@@ -300,6 +304,7 @@ export class ArticleAdminService implements IArticleAdminService {
 
     this.assertArticleScope(article, user);
 
+    const previousMedia = mediaKeys(article.image);
     const isSuper = this.isSuperAdmin(user);
 
     // Determine target category
@@ -427,7 +432,10 @@ export class ArticleAdminService implements IArticleAdminService {
       article.publishedAt = dto.publishedAt;
     }
 
-    await article.save();
+    await this.media.commit(
+      { next: mediaKeys(article.image), previous: previousMedia },
+      () => article.save(),
+    );
 
     return this.findById(id, user);
   }

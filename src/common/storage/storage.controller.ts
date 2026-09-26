@@ -21,25 +21,40 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
-import { StorageService } from './storage.service';
+import { StorageService } from './services/storage.service';
+import { MediaService } from './services/media.service';
+import { isAllowedUploadMime } from './upload-limits';
 import { MediaFileDto } from '../dtos/media-file.dto';
 import { translate } from '../utils/translate';
+import { GetUser } from '../../app/auth/decorators/get-user.decorator';
+import { AuthenticatedUser } from '../../app/auth/types';
 
 @ApiTags('Storage')
 @Controller('storage')
 export class StorageController {
-  constructor(private readonly storage: StorageService) {}
+  constructor(
+    private readonly storage: StorageService,
+    private readonly media: MediaService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post('upload')
   @ApiBearerAuth('access-token')
-  @ApiOperation({ summary: 'Upload a file; returns MediaFile metadata' })
+  @ApiOperation({
+    summary: 'Upload a file; returns MediaFile metadata',
+    description:
+      'Allowed MIME types: image/jpeg, image/png, image/webp, image/gif, application/pdf. Max 15 MB.',
+  })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        file: { type: 'string', format: 'binary' },
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'JPEG, PNG, WebP, GIF, or PDF (max 15 MB)',
+        },
         visibility: { type: 'string', enum: ['public', 'private'] },
       },
       required: ['file'],
@@ -52,6 +67,7 @@ export class StorageController {
     }),
   )
   async upload(
+    @GetUser() user: AuthenticatedUser | undefined,
     @UploadedFile() file: Express.Multer.File | undefined,
     @Query('visibility') visibility?: 'public' | 'private',
     @Query('prefix') prefix?: string,
@@ -59,18 +75,29 @@ export class StorageController {
     if (!file?.buffer?.length) {
       throw new BadRequestException(translate('errors.FILE_REQUIRED'));
     }
-    return this.storage.putObject({
+    if (!isAllowedUploadMime(file.mimetype)) {
+      throw new BadRequestException(translate('errors.UNSUPPORTED_FILE_TYPE'));
+    }
+    const media = await this.storage.putObject({
       buffer: file.buffer,
-      mimeType: file.mimetype || 'application/octet-stream',
+      mimeType: file.mimetype,
       originalName: file.originalname,
       prefix: prefix || 'uploads',
       visibility: visibility === 'public' ? 'public' : 'private',
     });
+    try {
+      await this.media.recordUpload(media.key, user?.id);
+    } catch (err) {
+      await this.storage.deleteObject(media.key);
+      throw err;
+    }
+    return media;
   }
 
   @Get('file')
   @ApiOperation({
-    summary: 'Stream a file by key (public keys unauthenticated; private need JWT)',
+    summary:
+      'Stream a file by key (public keys unauthenticated; private need JWT)',
   })
   @ApiQuery({ name: 'key', required: true })
   async getFile(

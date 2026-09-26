@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MediaService } from '../../../common/storage/services/media.service';
+import { buildMediaServiceMock } from '../../../common/storage/services/__test-helpers__/media-service.mock';
 import { getModelToken } from '@nestjs/mongoose';
 import {
   BadRequestException,
@@ -86,6 +88,7 @@ describe('DocumentRequestAdminService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         DocumentRequestAdminService,
+        { provide: MediaService, useValue: buildMediaServiceMock() },
         {
           provide: getModelToken(DocumentRequest.name),
           useValue: mockDocRequestModel,

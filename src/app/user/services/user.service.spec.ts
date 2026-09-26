@@ -6,7 +6,7 @@ import { UserService } from './user.service';
 import { User } from '../user.schema';
 import { Province } from '../../../common/schemas/province.schema';
 import { MemberDocument, MemberDocumentKind } from '../member-document.schema';
-import { StorageService } from '../../../common/storage/storage.service';
+import { StorageService } from '../../../common/storage/services/storage.service';
 import {
   buildMemberDocumentFixture,
   buildMemberDocumentModelMock,

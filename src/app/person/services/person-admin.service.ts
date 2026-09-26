@@ -18,6 +18,7 @@ import { UserRole } from '../../user/user.schema';
 import { translate } from '../../../common/utils/translate';
 import { isValidVideoUrl } from '../../../common/utils/video-url.util';
 import { toMediaFile } from '../../../common/utils/media-file.util';
+import { MediaService, mediaKeys } from '../../../common/storage/services/media.service';
 import { AuthenticatedUser } from '../../auth/types';
 import { AdminListPeopleDto } from '../dtos/admin-list-people.dto';
 import { CreatePersonDto } from '../dtos/create-person.dto';
@@ -48,6 +49,7 @@ export class PersonAdminService implements IPersonAdminService {
     private readonly personModel: Model<Person>,
     @InjectModel(Province.name)
     private readonly provinceModel: Model<Province>,
+    private readonly media: MediaService,
   ) {}
 
   /**
@@ -190,40 +192,46 @@ export class PersonAdminService implements IPersonAdminService {
       createdAt: new Date(),
     })) as PersonLicense[];
 
-    return this.personModel.create({
-      name: {
-        en: dto.name.en.trim(),
-        fa: dto.name.fa?.trim(),
-      },
-      photo: toMediaFile(dto.photo),
-      role: dto.role,
-      subRole: sanitized.subRole,
-      positionTitle: sanitized.positionTitle,
-      about: dto.about
-        ? {
-            en: dto.about.en.trim(),
-            fa: dto.about.fa?.trim(),
-          }
-        : undefined,
-      resume: dto.resume
-        ? {
-            en: dto.resume.en.trim(),
-            fa: dto.resume.fa?.trim(),
-          }
-        : undefined,
-      resumeFile: toMediaFile(dto.resumeFile),
-      introVideoUrl: dto.introVideoUrl ? dto.introVideoUrl.trim() : undefined,
-      contact: dto.contact
-        ? {
-            en: dto.contact.en.trim(),
-            fa: dto.contact.fa?.trim(),
-          }
-        : undefined,
-      province: sanitized.province,
-      licenses: licenses ?? [],
-      order,
-      status: dto.status ?? ActiveStatus.ACTIVE,
-    });
+    const photo = toMediaFile(dto.photo);
+    const resumeFile = toMediaFile(dto.resumeFile);
+    const media = this.personMedia({ photo, resumeFile, licenses });
+
+    return this.media.commit({ next: media }, () =>
+      this.personModel.create({
+        name: {
+          en: dto.name.en.trim(),
+          fa: dto.name.fa?.trim(),
+        },
+        photo,
+        role: dto.role,
+        subRole: sanitized.subRole,
+        positionTitle: sanitized.positionTitle,
+        about: dto.about
+          ? {
+              en: dto.about.en.trim(),
+              fa: dto.about.fa?.trim(),
+            }
+          : undefined,
+        resume: dto.resume
+          ? {
+              en: dto.resume.en.trim(),
+              fa: dto.resume.fa?.trim(),
+            }
+          : undefined,
+        resumeFile,
+        introVideoUrl: dto.introVideoUrl ? dto.introVideoUrl.trim() : undefined,
+        contact: dto.contact
+          ? {
+              en: dto.contact.en.trim(),
+              fa: dto.contact.fa?.trim(),
+            }
+          : undefined,
+        province: sanitized.province,
+        licenses: licenses ?? [],
+        order,
+        status: dto.status ?? ActiveStatus.ACTIVE,
+      }),
+    );
   }
 
   /**
@@ -245,6 +253,7 @@ export class PersonAdminService implements IPersonAdminService {
 
     this.assertPersonScope(person.role, person.province?.toString(), user);
 
+    const previousMedia = this.personMedia(person);
     const targetRole = dto.role ?? person.role;
     const targetProvince =
       dto.province !== undefined ? dto.province : person.province?.toString();
@@ -353,7 +362,10 @@ export class PersonAdminService implements IPersonAdminService {
       person.province = undefined;
     }
 
-    return person.save();
+    return this.media.commit(
+      { next: this.personMedia(person), previous: previousMedia },
+      () => person.save(),
+    );
   }
 
   /**
@@ -461,6 +473,7 @@ export class PersonAdminService implements IPersonAdminService {
 
     this.assertPersonScope(person.role, person.province?.toString(), user);
 
+    const previousMedia = this.personMedia(person);
     person.licenses.push({
       title: {
         en: dto.title.en.trim(),
@@ -470,7 +483,10 @@ export class PersonAdminService implements IPersonAdminService {
       createdAt: new Date(),
     });
 
-    return person.save();
+    return this.media.commit(
+      { next: this.personMedia(person), previous: previousMedia },
+      () => person.save(),
+    );
   }
 
   /**
@@ -492,6 +508,7 @@ export class PersonAdminService implements IPersonAdminService {
 
     this.assertPersonScope(person.role, person.province?.toString(), user);
 
+    const previousMedia = this.personMedia(person);
     const initialCount = person.licenses.length;
     person.licenses = person.licenses.filter(
       (lic: any) => lic._id?.toString() !== licenseId,
@@ -501,7 +518,20 @@ export class PersonAdminService implements IPersonAdminService {
       throw new NotFoundException(translate('errors.LICENSE_NOT_FOUND'));
     }
 
-    return person.save();
+    return this.media.commit(
+      { next: this.personMedia(person), previous: previousMedia },
+      () => person.save(),
+    );
+  }
+
+  private personMedia(
+    person: Pick<Person, 'photo' | 'resumeFile' | 'licenses'>,
+  ): string[] {
+    return mediaKeys(
+      person.photo,
+      person.resumeFile,
+      ...(person.licenses ?? []).map((l) => l.image),
+    );
   }
 
   /**

@@ -1,4 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { MediaService } from '../../../common/storage/services/media.service';
+import { buildMediaServiceMock } from '../../../common/storage/services/__test-helpers__/media-service.mock';
 import { getModelToken } from '@nestjs/mongoose';
 import {
   BadRequestException,
@@ -71,6 +73,7 @@ describe('EventAdminService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EventAdminService,
+        { provide: MediaService, useValue: buildMediaServiceMock() },
         {
           provide: getModelToken(Event.name),
           useValue: mockEventModel,
@@ -318,6 +321,7 @@ describe('EventAdminService', () => {
       mockEventRegistrationModel.deleteMany.mockReturnValue(
         buildQueryChain(true),
       );
+      mockEventRegistrationModel.find.mockReturnValue(buildQueryChain([]));
 
       const result = await service.delete(FIXED_EVENT_ID, buildSuperAdmin());
 

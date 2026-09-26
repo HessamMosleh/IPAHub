@@ -158,11 +158,13 @@ describe('AuthService OTP', () => {
   });
 
   describe('verifyOtp', () => {
-    function mockChallenge(overrides: Partial<{
-      codeHash: string;
-      attempts: number;
-      save: jest.Mock;
-    }> = {}) {
+    function mockChallenge(
+      overrides: Partial<{
+        codeHash: string;
+        attempts: number;
+        save: jest.Mock;
+      }> = {},
+    ) {
       const save = overrides.save ?? jest.fn().mockResolvedValue(undefined);
       const challenge = {
         codeHash: overrides.codeHash ?? '',

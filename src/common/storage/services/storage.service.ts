@@ -9,8 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import * as path from 'path';
 import { Client as MinioClient } from 'minio';
-import { MediaFile } from '../schemas/media-file.schema';
-import { translate } from '../utils/translate';
+import { MediaFile } from '../../schemas/media-file.schema';
+import { translate } from '../../utils/translate';
 
 export type StorageVisibility = 'public' | 'private';
 
@@ -107,8 +107,7 @@ export class StorageService implements OnModuleInit {
         this.client.getObject(this.bucket, key),
       ]);
       const mimeType =
-        stat.metaData?.['content-type'] ||
-        stat.metaData?.['Content-Type'];
+        stat.metaData?.['content-type'] || stat.metaData?.['Content-Type'];
       return {
         stream,
         mimeType,
@@ -134,8 +133,13 @@ export class StorageService implements OnModuleInit {
   }
 
   async deleteObject(key: string): Promise<void> {
+    await this.removeObject(key).catch(() => undefined);
+  }
+
+  /** Like `deleteObject`, but surfaces failures. Missing keys still succeed. */
+  async removeObject(key: string): Promise<void> {
     this.assertSafeKey(key);
-    await this.client.removeObject(this.bucket, key).catch(() => undefined);
+    await this.client.removeObject(this.bucket, key);
   }
 
   isPublicKey(key: string): boolean {
@@ -165,9 +169,7 @@ export class StorageService implements OnModuleInit {
     if (!err || typeof err !== 'object') return false;
     const e = err as { code?: string; statusCode?: number };
     return (
-      e.code === 'NoSuchKey' ||
-      e.code === 'NotFound' ||
-      e.statusCode === 404
+      e.code === 'NoSuchKey' || e.code === 'NotFound' || e.statusCode === 404
     );
   }
 
@@ -189,6 +191,7 @@ export class StorageService implements OnModuleInit {
       'image/jpeg': '.jpg',
       'image/png': '.png',
       'image/webp': '.webp',
+      'image/gif': '.gif',
       'application/pdf': '.pdf',
     };
     return map[mime] || '';
