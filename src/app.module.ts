@@ -13,6 +13,7 @@ import { UserModule } from './app/user/user.module';
 import { AuthModule } from './app/auth/auth.module';
 import { LanguageEnum } from './common/enums/language.enum';
 import { NewsModule } from './app/news/news.module';
+import { ArticleModule } from './app/article/article.module';
 import { ProvinceModule } from './app/province/province.module';
 import { PageModule } from './app/page/page.module';
 import { GalleryModule } from './app/gallery/gallery.module';
@@ -88,6 +89,7 @@ import { StorageModule } from './common/storage/storage.module';
     ProvinceModule,
     // Public content
     NewsModule,
+    ArticleModule,
     PageModule,
     GalleryModule,
     CommunityServiceModule,
