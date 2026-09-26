@@ -2,9 +2,8 @@ import {
   BadRequestException,
   Injectable,
   Logger,
-  OnModuleDestroy,
-  OnModuleInit,
 } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
 import { StorageService } from './storage.service';
@@ -13,7 +12,6 @@ import { translate } from '../../utils/translate';
 
 /** How long an upload may stay unclaimed before it is swept. */
 const PENDING_TTL_MS = 24 * 60 * 60 * 1000;
-const SWEEP_INTERVAL_MS = 60 * 60 * 1000;
 const SWEEP_BATCH = 200;
 
 type MediaRef = { key?: string | null } | string | null | undefined;
@@ -46,9 +44,8 @@ export interface MediaChange {
  * uploaded before the ledger existed) are never deleted by this service.
  */
 @Injectable()
-export class MediaService implements OnModuleInit, OnModuleDestroy {
+export class MediaService {
   private readonly logger = new Logger(MediaService.name);
-  private sweepTimer?: NodeJS.Timeout;
 
   constructor(
     @InjectModel(MediaUpload.name)
@@ -56,15 +53,9 @@ export class MediaService implements OnModuleInit, OnModuleDestroy {
     private readonly storage: StorageService,
   ) {}
 
-  onModuleInit(): void {
-    this.sweepTimer = setInterval(() => {
-      void this.sweepPending();
-    }, SWEEP_INTERVAL_MS);
-    this.sweepTimer.unref();
-  }
-
-  onModuleDestroy(): void {
-    if (this.sweepTimer) clearInterval(this.sweepTimer);
+  @Cron(CronExpression.EVERY_HOUR, { name: 'sweep-pending-media' })
+  async handleSweepPending(): Promise<void> {
+    await this.sweepPending();
   }
 
   async recordUpload(key: string, uploadedBy?: string): Promise<void> {
