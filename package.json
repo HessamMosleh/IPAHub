@@ -87,6 +87,9 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "moduleNameMapper": {
+      "^@nestjs/schedule$": "<rootDir>/../test/mocks/nestjs-schedule.ts"
+    },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],

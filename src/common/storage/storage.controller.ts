@@ -78,20 +78,16 @@ export class StorageController {
     if (!isAllowedUploadMime(file.mimetype)) {
       throw new BadRequestException(translate('errors.UNSUPPORTED_FILE_TYPE'));
     }
-    const media = await this.storage.putObject({
-      buffer: file.buffer,
-      mimeType: file.mimetype,
-      originalName: file.originalname,
-      prefix: prefix || 'uploads',
-      visibility: visibility === 'public' ? 'public' : 'private',
-    });
-    try {
-      await this.media.recordUpload(media.key, user?.id);
-    } catch (err) {
-      await this.storage.deleteObject(media.key);
-      throw err;
-    }
-    return media;
+    return this.media.upload(
+      {
+        buffer: file.buffer,
+        mimeType: file.mimetype,
+        originalName: file.originalname,
+        prefix: prefix || 'uploads',
+        visibility: visibility === 'public' ? 'public' : 'private',
+      },
+      user?.id,
+    );
   }
 
   @Get('file')

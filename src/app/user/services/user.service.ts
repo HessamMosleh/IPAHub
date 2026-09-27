@@ -18,7 +18,10 @@ import {
 } from '../member-document.schema';
 import { Province } from '../../../common/schemas/province.schema';
 import { MediaFile } from '../../../common/schemas/media-file.schema';
-import { StorageService } from '../../../common/storage/services/storage.service';
+import {
+  MediaService,
+  mediaKeys,
+} from '../../../common/storage/services/media.service';
 import { translate } from '../../../common/utils/translate';
 import { toInternationalMobile } from '../../../common/utils/mobile.util';
 
@@ -33,7 +36,7 @@ export class UserService {
     private readonly provinceModel: Model<Province>,
     @InjectModel(MemberDocument.name)
     private readonly memberDocumentModel: Model<MemberDocument>,
-    private readonly storage: StorageService,
+    private readonly media: MediaService,
   ) {}
 
   async registerMember(input: {
@@ -145,8 +148,15 @@ export class UserService {
     userId: string,
     dto: UpdateMemberProfileDto,
   ): Promise<User> {
+    const update: Record<string, unknown> = { ...dto };
+
+    if (dto.province) {
+      await this.ensureProvinceExists(dto.province);
+      update.province = new Types.ObjectId(dto.province);
+    }
+
     const user = await this.userModel
-      .findByIdAndUpdate(userId, { $set: dto }, { new: true })
+      .findByIdAndUpdate(userId, { $set: update }, { new: true })
       .select(UserProp.admin)
       .exec();
 
@@ -159,16 +169,19 @@ export class UserService {
 
   async setPhoto(userId: string, photo: MediaFile): Promise<User> {
     const existing = await this.findOne({ _id: userId });
-    if (existing.photo?.key) {
-      await this.storage
-        .deleteObject(existing.photo.key)
-        .catch(() => undefined);
-    }
 
-    const user = await this.userModel
-      .findByIdAndUpdate(userId, { photo }, { new: true })
-      .select(UserProp.admin)
-      .exec();
+    const user = await this.media.commit(
+      {
+        next: mediaKeys(photo),
+        previous: mediaKeys(existing.photo),
+        ownsPrevious: true,
+      },
+      () =>
+        this.userModel
+          .findByIdAndUpdate(userId, { photo }, { new: true })
+          .select(UserProp.admin)
+          .exec(),
+    );
 
     if (!user) {
       throw new NotFoundException(translate('errors.USER_NOT_FOUND'));
@@ -210,18 +223,23 @@ export class UserService {
       .findOne({ user: new Types.ObjectId(userId), kind })
       .exec();
 
-    if (existing?.file?.key) {
-      await this.storage.deleteObject(existing.file.key).catch(() => undefined);
+    if (existing) {
+      const previous = mediaKeys(existing.file);
       existing.file = file;
-      await existing.save();
+      await this.media.commit(
+        { next: mediaKeys(file), previous, ownsPrevious: true },
+        () => existing.save(),
+      );
       return this.toDocumentResponse(existing);
     }
 
-    const created = await this.memberDocumentModel.create({
-      user: new Types.ObjectId(userId),
-      kind,
-      file,
-    });
+    const created = await this.media.commit({ next: mediaKeys(file) }, () =>
+      this.memberDocumentModel.create({
+        user: new Types.ObjectId(userId),
+        kind,
+        file,
+      }),
+    );
     return this.toDocumentResponse(created);
   }
 
@@ -232,20 +250,18 @@ export class UserService {
     const doc = await this.memberDocumentModel
       .findOneAndDelete({ user: new Types.ObjectId(userId), kind })
       .exec();
-    if (doc?.file?.key) {
-      await this.storage.deleteObject(doc.file.key).catch(() => undefined);
-    }
+    await this.media.release(mediaKeys(doc?.file), { includeUntracked: true });
   }
 
   toResponse(user: User): UserResponseDto {
     const provinceId =
-      typeof user.province === 'object' &&
-      user.province &&
-      '_id' in user.province
-        ? (user.province as { _id: Types.ObjectId })._id.toString()
-        : typeof user.province === 'string'
-          ? user.province
-          : String(user.province);
+      user.province == null
+        ? undefined
+        : typeof user.province === 'object' && '_id' in user.province
+          ? (user.province as { _id: Types.ObjectId })._id.toString()
+          : typeof user.province === 'string'
+            ? user.province
+            : String(user.province);
 
     return {
       _id: user._id.toString(),

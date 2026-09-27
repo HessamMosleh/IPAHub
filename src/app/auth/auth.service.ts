@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -28,12 +27,6 @@ const MAX_ATTEMPTS = 5;
 const SEND_WINDOW_MS = 10 * 60 * 1000;
 const MAX_SENDS_PER_WINDOW = 3;
 const HASH_ROUNDS = 10;
-
-const ADMIN_ROLES = new Set([
-  UserRole.ADMIN,
-  UserRole.SUPER_ADMIN,
-  UserRole.PROVINCE_ADMIN,
-]);
 
 export interface AuthTokens {
   accessToken: string;
@@ -133,7 +126,6 @@ export class AuthService {
       if (!user) {
         throw new NotFoundException(translate('errors.USER_NOT_FOUND'));
       }
-      this.assertMemberOnly(user);
     } else if (purpose === OtpPurpose.REGISTER) {
       const existing = await this.userService.findByMobileOptional(international);
       if (existing) {
@@ -178,7 +170,6 @@ export class AuthService {
 
     if (dto.purpose === OtpPurpose.LOGIN) {
       const user = await this.userService.findOne({ mobile });
-      this.assertMemberOnly(user);
       if (!user.mobileVerifiedAt) {
         await this.userService.markMobileVerified(this.userIdStr(user));
       }
@@ -237,13 +228,6 @@ export class AuthService {
 
     if (!match) {
       throw new UnauthorizedException(translate('errors.OTP_INVALID'));
-    }
-  }
-
-  private assertMemberOnly(user: User): void {
-    const roles = user.roles ?? [];
-    if (roles.some((r) => ADMIN_ROLES.has(r))) {
-      throw new ForbiddenException(translate('errors.OTP_ADMIN_NOT_ALLOWED'));
     }
   }
 

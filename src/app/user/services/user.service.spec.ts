@@ -6,14 +6,14 @@ import { UserService } from './user.service';
 import { User } from '../user.schema';
 import { Province } from '../../../common/schemas/province.schema';
 import { MemberDocument, MemberDocumentKind } from '../member-document.schema';
-import { StorageService } from '../../../common/storage/services/storage.service';
+import { MediaService } from '../../../common/storage/services/media.service';
+import { buildMediaServiceMock } from '../../../common/storage/services/__test-helpers__/media-service.mock';
 import {
   buildMemberDocumentFixture,
   buildMemberDocumentModelMock,
   buildProvinceAdminFixture,
   buildProvinceModelMock,
   buildQueryChain,
-  buildStorageServiceMock,
   buildUserFixture,
   buildUserModelMock,
   FIXED_DOCUMENT_ID,
@@ -27,13 +27,13 @@ describe('UserService', () => {
   let userModel: ReturnType<typeof buildUserModelMock>;
   let provinceModel: ReturnType<typeof buildProvinceModelMock>;
   let memberDocumentModel: ReturnType<typeof buildMemberDocumentModelMock>;
-  let storage: ReturnType<typeof buildStorageServiceMock>;
+  let media: ReturnType<typeof buildMediaServiceMock>;
 
   beforeEach(async () => {
     userModel = buildUserModelMock();
     provinceModel = buildProvinceModelMock();
     memberDocumentModel = buildMemberDocumentModelMock();
-    storage = buildStorageServiceMock();
+    media = buildMediaServiceMock();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -44,7 +44,7 @@ describe('UserService', () => {
           provide: getModelToken(MemberDocument.name),
           useValue: memberDocumentModel,
         },
-        { provide: StorageService, useValue: storage },
+        { provide: MediaService, useValue: media },
       ],
     }).compile();
 
@@ -266,10 +266,46 @@ describe('UserService', () => {
         service.updateMemberProfile(FIXED_USER_ID, { fullName: 'New Name' }),
       ).rejects.toThrow(NotFoundException);
     });
+
+    it('updates user profile including province when valid', async () => {
+      provinceModel.exists.mockResolvedValue(true);
+      const updated = buildUserFixture({ fullName: 'New Name' });
+      userModel.findByIdAndUpdate.mockReturnValue(buildQueryChain(updated));
+
+      const res = await service.updateMemberProfile(FIXED_USER_ID, {
+        fullName: 'New Name',
+        province: FIXED_PROVINCE_ID,
+      });
+
+      expect(provinceModel.exists).toHaveBeenCalledWith({
+        _id: FIXED_PROVINCE_ID,
+      });
+      expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
+        FIXED_USER_ID,
+        {
+          $set: {
+            fullName: 'New Name',
+            province: expect.any(Object),
+          },
+        },
+        { new: true },
+      );
+      expect(res).toBe(updated);
+    });
+
+    it('throws NotFoundException when province does not exist', async () => {
+      provinceModel.exists.mockResolvedValue(false);
+
+      await expect(
+        service.updateMemberProfile(FIXED_USER_ID, {
+          province: FIXED_PROVINCE_ID,
+        }),
+      ).rejects.toThrow(NotFoundException);
+    });
   });
 
   describe('setPhoto', () => {
-    it('deletes the previous photo object before storing the new one', async () => {
+    it('claims the new photo and releases the previous one it owns', async () => {
       const existing = buildUserFixture({
         photo: { key: 'photos/old.png', mimeType: 'image/png' },
       });
@@ -280,7 +316,14 @@ describe('UserService', () => {
       const photo = { key: 'photos/new.png', mimeType: 'image/png' };
       const result = await service.setPhoto(FIXED_USER_ID, photo);
 
-      expect(storage.deleteObject).toHaveBeenCalledWith('photos/old.png');
+      expect(media.commit).toHaveBeenCalledWith(
+        {
+          next: ['photos/new.png'],
+          previous: ['photos/old.png'],
+          ownsPrevious: true,
+        },
+        expect.any(Function),
+      );
       expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(
         FIXED_USER_ID,
         { photo },
@@ -289,18 +332,14 @@ describe('UserService', () => {
       expect(result).toBe(updated);
     });
 
-    it('tolerates a failing delete of the previous photo', async () => {
-      const existing = buildUserFixture({
-        photo: { key: 'photos/old.png', mimeType: 'image/png' },
-      });
-      userModel.findOne.mockReturnValue(buildQueryChain(existing));
-      const updated = buildUserFixture();
-      userModel.findByIdAndUpdate.mockReturnValue(buildQueryChain(updated));
-      storage.deleteObject.mockRejectedValue(new Error('minio down'));
+    it('propagates a rejected claim without saving the photo', async () => {
+      userModel.findOne.mockReturnValue(buildQueryChain(buildUserFixture()));
+      media.commit.mockRejectedValueOnce(new Error('not uploaded'));
 
       await expect(
         service.setPhoto(FIXED_USER_ID, { key: 'photos/new.png' } as any),
-      ).resolves.toBe(updated);
+      ).rejects.toThrow('not uploaded');
+      expect(userModel.findByIdAndUpdate).not.toHaveBeenCalled();
     });
   });
 
@@ -345,7 +384,14 @@ describe('UserService', () => {
         file,
       );
 
-      expect(storage.deleteObject).toHaveBeenCalledWith('documents/old.pdf');
+      expect(media.commit).toHaveBeenCalledWith(
+        {
+          next: ['documents/new.pdf'],
+          previous: ['documents/old.pdf'],
+          ownsPrevious: true,
+        },
+        expect.any(Function),
+      );
       expect(existing.file).toBe(file);
       expect(existing.save).toHaveBeenCalled();
       expect(memberDocumentModel.create).not.toHaveBeenCalled();
@@ -365,6 +411,10 @@ describe('UserService', () => {
         file,
       );
 
+      expect(media.commit).toHaveBeenCalledWith(
+        { next: ['documents/wp.pdf'] },
+        expect.any(Function),
+      );
       expect(memberDocumentModel.create).toHaveBeenCalledWith({
         user: expect.any(Types.ObjectId),
         kind: MemberDocumentKind.WORKPLACE_CERTIFICATE,
@@ -386,12 +436,12 @@ describe('UserService', () => {
         MemberDocumentKind.EDUCATION_CERTIFICATE,
       );
 
-      expect(storage.deleteObject).toHaveBeenCalledWith(
-        'documents/license.pdf',
-      );
+      expect(media.release).toHaveBeenCalledWith(['documents/license.pdf'], {
+        includeUntracked: true,
+      });
     });
 
-    it('leaves storage alone when the deleted row had no file', async () => {
+    it('releases nothing when the deleted row had no file', async () => {
       memberDocumentModel.findOneAndDelete.mockReturnValue(
         buildQueryChain(null),
       );
@@ -401,7 +451,9 @@ describe('UserService', () => {
         MemberDocumentKind.STUDENT_CARD,
       );
 
-      expect(storage.deleteObject).not.toHaveBeenCalled();
+      expect(media.release).toHaveBeenCalledWith([], {
+        includeUntracked: true,
+      });
     });
   });
 

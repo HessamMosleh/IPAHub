@@ -37,8 +37,8 @@ export class UserResponseDto {
   @ApiProperty({ enum: UserRole, isArray: true })
   roles: UserRole[];
 
-  @ApiProperty()
-  province: string;
+  @ApiPropertyOptional()
+  province?: string;
 
   @ApiPropertyOptional({ type: [String] })
   managedProvinces?: string[];

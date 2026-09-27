@@ -1,6 +1,7 @@
 import {
   IsDate,
   IsEnum,
+  IsMongoId,
   IsOptional,
   IsString,
   MaxLength,
@@ -8,11 +9,7 @@ import {
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { i18nValidationMessage } from 'nestjs-i18n';
-import {
-  EducationLevel,
-  MaritalStatus,
-  UserSex,
-} from '../user.schema';
+import { EducationLevel, MaritalStatus, UserSex } from '../user.schema';
 import { foldDigits } from '../../../common/utils/digit.util';
 
 export class UpdateMemberProfileDto {
@@ -34,6 +31,11 @@ export class UpdateMemberProfileDto {
   @IsOptional()
   @IsEnum(UserSex, { message: i18nValidationMessage('validation.IS_ENUM') })
   sex?: UserSex;
+
+  @ApiPropertyOptional({ description: 'User province ObjectId' })
+  @IsOptional()
+  @IsMongoId({ message: i18nValidationMessage('validation.IS_MONGO_ID') })
+  province?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

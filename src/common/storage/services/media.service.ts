@@ -1,13 +1,10 @@
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
-import { StorageService } from './storage.service';
+import { PutObjectInput, StorageService } from './storage.service';
 import { MediaUpload, MediaUploadStatus } from '../media-upload.schema';
+import { MediaFile } from '../../schemas/media-file.schema';
 import { translate } from '../../utils/translate';
 
 /** How long an upload may stay unclaimed before it is swept. */
@@ -29,19 +26,32 @@ export interface MediaChange {
   next: string[];
   /** Keys the owner referenced before the save. */
   previous?: string[];
+  /**
+   * The owner is the only possible holder of `previous`, so dropped keys are
+   * deleted even without a ledger row (files stored before the ledger existed).
+   */
+  ownsPrevious?: boolean;
+}
+
+export interface ReleaseOptions {
+  /** Also delete keys that have no ledger row. Only for exclusively owned keys. */
+  includeUntracked?: boolean;
 }
 
 /**
- * Ties objects uploaded through `POST /storage/upload` to the documents that
- * embed them, so MinIO does not accumulate orphans.
+ * The single write path for user-supplied files, and the ledger that ties them
+ * to the documents embedding them so MinIO does not accumulate orphans.
  *
+ * - `upload` stores the object and records it as `PENDING`. Every endpoint
+ *   that accepts a file goes through it; nothing else calls `putObject`.
  * - `commit` claims newly referenced keys before the owner is saved, reverts
  *   the claim if the save throws, and releases keys the owner dropped.
  * - `release` deletes objects whose owner was deleted.
  * - Uploads never claimed within {@link PENDING_TTL_MS} are swept hourly.
  *
- * Keys without a ledger row (seed assets, server-written files, and objects
- * uploaded before the ledger existed) are never deleted by this service.
+ * Keys without a ledger row (seed assets and objects uploaded before the
+ * ledger existed) are only deleted when the caller opts in with
+ * `ownsPrevious` / `includeUntracked`.
  */
 @Injectable()
 export class MediaService {
@@ -56,6 +66,17 @@ export class MediaService {
   @Cron(CronExpression.EVERY_HOUR, { name: 'sweep-pending-media' })
   async handleSweepPending(): Promise<void> {
     await this.sweepPending();
+  }
+
+  async upload(input: PutObjectInput, uploadedBy?: string): Promise<MediaFile> {
+    const media = await this.storage.putObject(input);
+    try {
+      await this.recordUpload(media.key, uploadedBy);
+    } catch (err) {
+      await this.storage.deleteObject(media.key);
+      throw err;
+    }
+    return media;
   }
 
   async recordUpload(key: string, uploadedBy?: string): Promise<void> {
@@ -85,29 +106,36 @@ export class MediaService {
       throw err;
     }
 
-    await this.release(removed);
+    await this.release(removed, { includeUntracked: change.ownsPrevious });
     return result;
   }
 
   /** Best-effort: never throws, so a MinIO outage cannot fail the caller. */
-  async release(keys: string[]): Promise<void> {
+  async release(keys: string[], options: ReleaseOptions = {}): Promise<void> {
     const unique = [...new Set(keys.filter(Boolean))];
     if (!unique.length) return;
 
     try {
       const rows = await this.mediaUploadModel
-        .find({ key: { $in: unique }, status: MediaUploadStatus.ATTACHED })
-        .select('key')
+        .find({ key: { $in: unique } })
+        .select('key status')
         .exec();
+      const rowsByKey = new Map(rows.map((row) => [row.key, row]));
 
-      for (const row of rows) {
+      for (const key of unique) {
+        const row = rowsByKey.get(key);
+        const releasable = row
+          ? row.status === MediaUploadStatus.ATTACHED
+          : !!options.includeUntracked;
+        if (!releasable) continue;
+
         try {
-          await this.storage.removeObject(row.key);
-          await this.mediaUploadModel.deleteOne({ _id: row._id }).exec();
+          await this.storage.removeObject(key);
+          if (row) {
+            await this.mediaUploadModel.deleteOne({ _id: row._id }).exec();
+          }
         } catch (err) {
-          this.logger.warn(
-            `Failed to release media ${row.key}: ${String(err)}`,
-          );
+          this.logger.warn(`Failed to release media ${key}: ${String(err)}`);
         }
       }
     } catch (err) {

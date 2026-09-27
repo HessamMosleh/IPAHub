@@ -1,5 +1,6 @@
-import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { Logger, Module, OnModuleInit } from '@nestjs/common';
+import { InjectModel, MongooseModule } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { User, UserSchema } from './user.schema';
 import { MemberDocument, MemberDocumentSchema } from './member-document.schema';
 import { Province, ProvinceSchema } from '../../common/schemas/province.schema';
@@ -12,6 +13,8 @@ import { UserAdminController } from './controllers/user-admin.controller';
 import { SmsSender } from '../auth/sms.stub';
 import { UserService } from './services/user.service';
 import { UserController } from './controllers/user.controller';
+
+const LEGACY_STORAGE_KEY_INDEX = 'storageKey_1';
 
 /**
  * User Feature Module.
@@ -35,4 +38,30 @@ import { UserController } from './controllers/user.controller';
   exports: [UserService, UserAdminService, MongooseModule],
   controllers: [UserController, UserAdminController],
 })
-export class UserModule {}
+export class UserModule implements OnModuleInit {
+  private readonly logger = new Logger(UserModule.name);
+
+  constructor(
+    @InjectModel(MemberDocument.name)
+    private readonly memberDocumentModel: Model<MemberDocument>,
+  ) {}
+
+  /**
+   * `MemberDocument.storageKey` was replaced by `file`, but Mongoose never drops
+   * indexes, so databases created before the change keep a unique index on
+   * `storageKey` that every new row violates with `null`.
+   */
+  async onModuleInit(): Promise<void> {
+    try {
+      const collection = this.memberDocumentModel.collection;
+      if (await collection.indexExists(LEGACY_STORAGE_KEY_INDEX)) {
+        await collection.dropIndex(LEGACY_STORAGE_KEY_INDEX);
+        this.logger.log(`Dropped legacy index ${LEGACY_STORAGE_KEY_INDEX}`);
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Failed to drop legacy index ${LEGACY_STORAGE_KEY_INDEX}: ${String(err)}`,
+      );
+    }
+  }
+}

@@ -29,6 +29,7 @@ import { UpdateMemberProfileDto } from '../dtos/update-member-profile.dto';
 import { UserResponseDto } from '../dtos/user-response.dto';
 import { MemberDocumentKind } from '../member-document.schema';
 import { StorageService } from '../../../common/storage/services/storage.service';
+import { MediaService } from '../../../common/storage/services/media.service';
 import {
   isAllowedDocumentMime,
   isAllowedPhotoMime,
@@ -45,6 +46,7 @@ export class UserController {
   constructor(
     private readonly userService: UserService,
     private readonly storage: StorageService,
+    private readonly media: MediaService,
   ) {}
 
   @Get('me')
@@ -92,13 +94,16 @@ export class UserController {
     if (!isAllowedPhotoMime(file.mimetype)) {
       throw new BadRequestException(translate('errors.UNSUPPORTED_FILE_TYPE'));
     }
-    const media = await this.storage.putObject({
-      buffer: file.buffer,
-      mimeType: file.mimetype,
-      originalName: file.originalname,
-      prefix: 'photos',
-      visibility: 'private',
-    });
+    const media = await this.media.upload(
+      {
+        buffer: file.buffer,
+        mimeType: file.mimetype,
+        originalName: file.originalname,
+        prefix: 'photos',
+        visibility: 'private',
+      },
+      auth.id,
+    );
     const user = await this.userService.setPhoto(auth.id, media);
     return this.userService.toResponse(user);
   }
@@ -142,13 +147,16 @@ export class UserController {
     if (!isAllowedDocumentMime(file.mimetype)) {
       throw new BadRequestException(translate('errors.UNSUPPORTED_FILE_TYPE'));
     }
-    const media = await this.storage.putObject({
-      buffer: file.buffer,
-      mimeType: file.mimetype,
-      originalName: file.originalname,
-      prefix: 'documents',
-      visibility: 'private',
-    });
+    const media = await this.media.upload(
+      {
+        buffer: file.buffer,
+        mimeType: file.mimetype,
+        originalName: file.originalname,
+        prefix: 'documents',
+        visibility: 'private',
+      },
+      auth.id,
+    );
     return this.userService.upsertDocument(auth.id, kind, media);
   }
 

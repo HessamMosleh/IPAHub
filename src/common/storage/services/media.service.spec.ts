@@ -30,11 +30,19 @@ const findChain = <T>(rows: T[]) => {
 describe('MediaService', () => {
   let service: MediaService;
   let model: ReturnType<typeof buildModelMock>;
-  let storage: { removeObject: jest.Mock };
+  let storage: {
+    putObject: jest.Mock;
+    deleteObject: jest.Mock;
+    removeObject: jest.Mock;
+  };
 
   beforeEach(async () => {
     model = buildModelMock();
-    storage = { removeObject: jest.fn().mockResolvedValue(undefined) };
+    storage = {
+      putObject: jest.fn(),
+      deleteObject: jest.fn().mockResolvedValue(undefined),
+      removeObject: jest.fn().mockResolvedValue(undefined),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -52,6 +60,37 @@ describe('MediaService', () => {
       expect(
         mediaKeys({ key: ' a ' }, undefined, null, { key: '' }, 'b', 'a'),
       ).toEqual(['a', 'b']);
+    });
+  });
+
+  describe('upload', () => {
+    const input = {
+      buffer: Buffer.from('x'),
+      mimeType: 'image/png',
+      prefix: 'photos',
+    };
+
+    it('stores the object and records it as PENDING', async () => {
+      storage.putObject.mockResolvedValue({ key: 'private/photos/a.png' });
+
+      const media = await service.upload(input, '507f1f77bcf86cd799439011');
+
+      expect(storage.putObject).toHaveBeenCalledWith(input);
+      expect(model.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: 'private/photos/a.png',
+          status: MediaUploadStatus.PENDING,
+        }),
+      );
+      expect(media).toEqual({ key: 'private/photos/a.png' });
+    });
+
+    it('removes the object again when the ledger row cannot be written', async () => {
+      storage.putObject.mockResolvedValue({ key: 'private/photos/a.png' });
+      model.create.mockRejectedValueOnce(new Error('mongo down'));
+
+      await expect(service.upload(input)).rejects.toThrow('mongo down');
+      expect(storage.deleteObject).toHaveBeenCalledWith('private/photos/a.png');
     });
   });
 
@@ -74,7 +113,11 @@ describe('MediaService', () => {
   describe('commit', () => {
     it('claims added keys, saves, then releases dropped keys', async () => {
       model.findOneAndUpdate.mockReturnValue(exec({ key: 'new' }));
-      model.find.mockReturnValue(findChain([{ _id: 'row-old', key: 'old' }]));
+      model.find.mockReturnValue(
+        findChain([
+          { _id: 'row-old', key: 'old', status: MediaUploadStatus.ATTACHED },
+        ]),
+      );
       const save = jest.fn().mockResolvedValue('saved');
 
       const result = await service.commit(
@@ -88,12 +131,24 @@ describe('MediaService', () => {
         { key: 'new', status: MediaUploadStatus.PENDING },
         { $set: { status: MediaUploadStatus.ATTACHED } },
       );
-      expect(model.find).toHaveBeenCalledWith({
-        key: { $in: ['old'] },
-        status: MediaUploadStatus.ATTACHED,
-      });
+      expect(model.find).toHaveBeenCalledWith({ key: { $in: ['old'] } });
       expect(storage.removeObject).toHaveBeenCalledWith('old');
       expect(model.deleteOne).toHaveBeenCalledWith({ _id: 'row-old' });
+    });
+
+    it('deletes an untracked previous key only when the owner owns it', async () => {
+      model.find.mockReturnValue(findChain([]));
+      const save = jest.fn().mockResolvedValue(undefined);
+
+      await service.commit({ next: [], previous: ['legacy'] }, save);
+      expect(storage.removeObject).not.toHaveBeenCalled();
+
+      await service.commit(
+        { next: [], previous: ['legacy'], ownsPrevious: true },
+        save,
+      );
+      expect(storage.removeObject).toHaveBeenCalledWith('legacy');
+      expect(model.deleteOne).not.toHaveBeenCalled();
     });
 
     it('rejects a key that was never uploaded and unclaims earlier keys', async () => {
@@ -141,12 +196,28 @@ describe('MediaService', () => {
 
   describe('release', () => {
     it('keeps the ledger row when MinIO fails, and never throws', async () => {
-      model.find.mockReturnValue(findChain([{ _id: 'r1', key: 'k1' }]));
+      model.find.mockReturnValue(
+        findChain([
+          { _id: 'r1', key: 'k1', status: MediaUploadStatus.ATTACHED },
+        ]),
+      );
       storage.removeObject.mockRejectedValue(new Error('minio down'));
 
       await expect(service.release(['k1'])).resolves.toBeUndefined();
 
       expect(model.deleteOne).not.toHaveBeenCalled();
+    });
+
+    it('never deletes a PENDING upload, even with includeUntracked', async () => {
+      model.find.mockReturnValue(
+        findChain([
+          { _id: 'r1', key: 'k1', status: MediaUploadStatus.PENDING },
+        ]),
+      );
+
+      await service.release(['k1'], { includeUntracked: true });
+
+      expect(storage.removeObject).not.toHaveBeenCalled();
     });
   });
 
